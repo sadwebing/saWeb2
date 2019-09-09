@@ -1,4 +1,3 @@
-#-_- coding: utf-8 -_-
 from django.shortcuts               import render
 from django.contrib.auth.decorators import login_required
 from django.http                    import HttpResponse
@@ -10,8 +9,8 @@ logger = logging.getLogger('django')
 
 # Create your views here.
 @csrf_exempt
-def Login(request):
-    title = u'登陆页面'
+def Index(request):
+    title = u'默认页面'
     global username, role, clientip
     username = request.user.username
     try:
@@ -22,13 +21,18 @@ def Login(request):
         clientip = request.META['HTTP_X_FORWARDED_FOR']
     else:
         clientip = request.META['REMOTE_ADDR']
-    logger.info('%s is requesting %s.' %(clientip, request.get_full_path()))
+    logger.info('%s is requesting %s' %(clientip, request.get_full_path()))
 
-    return HttpResponse(json.dumps({
-              "code": 0
-              ,"msg": "登入成功"
-              ,"data": {
-                "saWebtoken": "c262e61cd13ad99fc650e6908c7e5e65b63d2f32185ecfed6b801ee3fbdd5c0a"
-              }
-            })
-        )
+    # return HttpResponse(json.dumps({
+    #           "code": 0
+    #           ,"msg": "登入成功"
+    #           ,"data": {
+    #             "saWebtoken": "c262e61cd13ad99fc650e6908c7e5e65b63d2f32185ecfed6b801ee3fbdd5c0a"
+    #           }
+    #         })
+    #     )
+
+    return render(
+        request,
+        'home.html',
+    )

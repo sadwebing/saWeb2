@@ -26,7 +26,7 @@ layui.define(['laytpl', 'layer', 'element', 'util'], function(exports){
     
     //自定义请求字段
     ,request: {
-      tokenName: 'access_token' //自动携带 token 的字段名。可设置 false 不携带。
+      tokenName: 'saWebtoken' //自动携带 token 的字段名。可设置 false 不携带。
     }
     
     //自定义响应字段
@@ -42,7 +42,7 @@ layui.define(['laytpl', 'layer', 'element', 'util'], function(exports){
     
     //独立页面路由，可随意添加（无需写参数）
     ,indPage: [
-      '/accounts/login' //登入页
+      '/domainns/index' //登入页
       ,'/user/reg' //注册页
       ,'/user/forget' //找回密码
       ,'/template/tips/test' //独立页的一个测试 demo
