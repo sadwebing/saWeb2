@@ -192,7 +192,7 @@ layui.define(function(exports){
     //今日热搜
     table.render({
       elem: '#LAY-index-topSearch'
-      ,url: './json/console/top-search.js' //模拟接口
+      ,url: '/static/start/json/console/top-search.js' //模拟接口
       ,page: true
       ,cols: [[
         {type: 'numbers', fixed: 'left'}
@@ -206,7 +206,7 @@ layui.define(function(exports){
     //今日热贴
     table.render({
       elem: '#LAY-index-topCard'
-      ,url: './json/console/top-card.js' //模拟接口
+      ,url: '/static/start/json/console/top-card.js' //模拟接口
       ,page: true
       ,cellMinWidth: 120
       ,cols: [[

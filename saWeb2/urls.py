@@ -20,8 +20,16 @@ from django.conf      import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # django管理后台
     path('admin/', admin.site.urls),
+    
+    # 域名解析管理
     url(r'^', include('domainns.urls')),
     url(r'^domainns/', include('domainns.urls')),
+
+    # 主页 telegram
+    url(r'^detect/', include('detect.urls')),
+
+    # 登陆控制及用户信息
     url(r'^control/', include('control.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

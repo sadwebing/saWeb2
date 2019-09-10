@@ -26,13 +26,28 @@ layui.define(function(exports){
 
     //执行退出接口
     admin.req({
-      url: '/user/login'
-      ,type: 'get'
-      ,data: {}
+      url: '/control/logout'
+      ,type: 'post'
+      ,data:{}
       ,done: function(res){ //这里要说明一下：done 是只有 response 的 code 正常才会执行。而 succese 则是只要 http 为 200 就会执行
         
+        //登出的提示
+        layer.msg(res.msg, {
+          offset: '15px'
+          ,icon: 1
+          ,time: 1000
+        });
+
         //清空本地记录的 token，并跳转到登入页
         admin.exit();
+      },success: function(res){
+        if (res.code == 1001){
+          layer.msg(res.msg, {
+            offset: '15px'
+            ,icon: 1
+            ,time: 1000
+          })
+        }
       }
     });
   };

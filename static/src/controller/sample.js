@@ -260,7 +260,7 @@ layui.define(function(exports){
     
     table.render({
       elem: '#LAY-home-homepage2'
-      ,url: './json/console/prograss.js' //模拟接口
+      ,url: '/static/start/json/console/prograss.js' //模拟接口
       ,cols: [[
         {type: 'checkbox', fixed: 'left'}
         ,{field: 'prograss', title: '任务'}

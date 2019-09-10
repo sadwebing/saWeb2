@@ -14,9 +14,9 @@ layui.define(['laytpl', 'layer', 'element', 'util'], function(exports){
     ,views: layui.cache.base + 'views/' //视图所在目录
     ,entry: 'index' //默认视图文件名
     ,engine: '.html' //视图文件后缀名
-    ,pageTabs: false //是否开启页面选项卡功能。单页版不推荐开启
+    ,pageTabs: true //是否开启页面选项卡功能。单页版不推荐开启
     
-    ,name: 'layuiAdmin Pro'
+    ,name: '运维'
     ,tableName: 'layuiAdmin' //本地存储表名
     ,MOD_NAME: 'admin' //模块事件名
     
@@ -26,7 +26,8 @@ layui.define(['laytpl', 'layer', 'element', 'util'], function(exports){
     
     //自定义请求字段
     ,request: {
-      tokenName: 'saWebtoken' //自动携带 token 的字段名。可设置 false 不携带。
+      tokenName: 'csrftoken' //自动携带 token 的字段名。可设置 false 不携带。
+      // tokenName: false
     }
     
     //自定义响应字段
