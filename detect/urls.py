@@ -5,7 +5,8 @@ from . import views
 
 urlpatterns = [
     # 发送telegram信息
-    url('telegram$', views.TelegramGroup, name='TelegramGroup'),
-    # url('telegram/sendgroupmessage$', views.Telegramsendgroupmessage, name='Telegramsendgroupmessage'),
+    url('telegram$', views.telegram_group, name='TelegramGroup'),
+    url('telegram/sendgroupmessage$', views.telegram_sendgroupmessage, name='Telegramsendgroupmessage'),
     # url('telegram/uploadimgs$', views.TelegramUploadimgs, name='TelegramUploadimgs'),
+
 ]

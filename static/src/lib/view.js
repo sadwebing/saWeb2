@@ -123,6 +123,9 @@ layui.define(['laytpl', 'layer'], function(exports){
         view.error(error);
         
         typeof error === 'function' && error(res);
+        if (loading1_iii){
+          layer.close(loading1_iii);
+        }
       }
     }, options));
   };

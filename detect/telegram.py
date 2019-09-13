@@ -6,8 +6,9 @@
 
 import requests, sys, os
 import datetime, json, logging, re
-# from detect.models import telegram_user_id_t, telegram_chat_group_t
-from saWeb2        import settings
+from detect.models      import telegram_user_id_t, telegram_chat_group_t
+from saWeb2             import settings
+from control.middleware import config
 
 logger = logging.getLogger('django')
 
@@ -24,7 +25,7 @@ def getDate():
 
 #telegram 通知
 
-class sendTelegram(object):
+class SendTelegram(object):
     def __init__(self, message):
         '''
             参数初始化:message
@@ -40,28 +41,28 @@ class sendTelegram(object):
             disable_web_page_preview：是否关闭预览[True|False，默认True]
         }
         '''
-        tg         = settings.TELEGRAM_API
-        bot        = message['bot']     if message.has_key('bot')   else ''
-        doc        = message['doc']     if message.has_key('doc')   else False
-        group      = message['group']   if message.has_key('group') else ''
-        timeout    = message['timeout'] if message.has_key('timeout') and isinstance(message['timeout'], int) else 15
+        tg         = config.TELEGRAM_API
+        bot        = message['bot']     if 'bot' in message else ''
+        doc        = message['doc']     if 'doc' in message else False
+        group      = message['group']   if 'group'   in message else ''
+        timeout    = message['timeout'] if 'timeout' in message and isinstance(message['timeout'], int) else 15
 
         self.__message = {}
         self.__doc     = doc
         self.__timeout = timeout
-        self.__url     = tg['url'][bot] if tg['url'].has_key(bot) else tg['url']['sa_monitor_bot']
-        self.__message['parse_mode'] = message['parse_mode'] if message.has_key('parse_mode') else ''
-        self.__message['doc_name']   = getDate() +'_'+ message['doc_name'] if message.has_key('doc_name') else getDate()+'_message.txt'
-        self.__message['caption']    = self.getAtUsers(message['caption']) if message.has_key('caption')  else ''
-        self.__message['text']       = self.getAtUsers(message['text'])    if message.has_key('text')     else ''
-        self.__message['disable_web_page_preview'] = False if message.has_key('disable_web_page_preview') and str(message['disable_web_page_preview']).lower() == 'false' else True
+        self.__url     = tg['url'][bot] if bot in tg['url'] else tg['url']['sa_monitor_bot']
+        self.__message['parse_mode'] = message['parse_mode'] if 'parse_mode' in message else ''
+        self.__message['doc_name']   = getDate() +'_'+ message['doc_name'] if 'doc_name' in message else getDate()+'_message.txt'
+        self.__message['caption']    = self.get_at_users(message['caption']) if 'caption'  in message  else ''
+        self.__message['text']       = self.get_at_users(message['text'])    if 'text'     in message else ''
+        self.__message['disable_web_page_preview'] = False if 'disable_web_page_preview' in message and str(message['disable_web_page_preview']).lower() == 'false' else True
 
         try: 
             self.__message['chat_id'] = telegram_chat_group_t.objects.get(group=group).group_id 
         except: 
             self.__message['chat_id'] = telegram_chat_group_t.objects.get(group="arno_test").group_id 
 
-    def getAtUsers(self, text):
+    def get_at_users(self, text):
         regCp  = re.compile('[A-Za-z0-9]+(?![A-Za-z0-9])', re.I)
         user_l = [ {'user': '@'+regCp.match(user).group(),
                     'name': regCp.match(user.lower()).group()} for user in text.split('@')[1:] if regCp.match(user.lower())]
@@ -78,7 +79,7 @@ class sendTelegram(object):
                 user_id_l[i.user]['user_id'] = i.user_id
 
             for user in user_l:
-                if user_id_l.has_key(user['name']):
+                if user['name'] in user_id_l:
                     if self.__message['parse_mode'] == 'HTML':
                         atUser = "<a href='tg://user?id=%s'>%s</a>" %(user_id_l[user['name']]['user_id'], user_id_l[user['name']]['name'])
                         text = text.replace(user['user'], atUser)
@@ -90,7 +91,7 @@ class sendTelegram(object):
         return text
 
     def send(self):
-        self.__message['text'] = self.__message['text'].decode('utf8')
+        self.__message['text'] = self.__message['text']
         #logger.info(self.__message['text'])
         #logger.info(type(self.__message['text']))
         try:
@@ -105,7 +106,7 @@ class sendTelegram(object):
                 
         except Exception as e:
             logger.error('Attention: send message failed!')
-            logger.error(e.message)
+            logger.error(e)
             return False
         else:
             if ret.status_code == 200:
@@ -117,12 +118,12 @@ class sendTelegram(object):
                 logger.error(self.__message)
                 return False
 
-    def sendPhoto(self, photo):
+    def send_photo(self, photo):
         '''
             发送图片
         '''
         if not photo: return False
-        self.__message['text']    = self.__message['text'].decode('utf8')
+        self.__message['text']    = self.__message['text']
         self.__message['caption'] = self.__message['text']
         files = {'photo': photo}
         try:
@@ -130,7 +131,7 @@ class sendTelegram(object):
                 
         except Exception as e:
             logger.error('Attention: send photo failed!')
-            logger.error(e.message)
+            logger.error(e)
             return False
         else:
             if ret.status_code == 200:
@@ -142,12 +143,12 @@ class sendTelegram(object):
                 logger.error(self.__message)
                 return False
 
-    def sendDocument(self, file):
+    def send_document(self, file):
         '''
-            发送图片
+            发送文件
         '''
         if not file: return False
-        self.__message['text'] = self.__message['text'].decode('utf8')
+        self.__message['text'] = self.__message['text']
         self.__message['caption'] = self.__message['text']
         files = {'document': file}
         try:
@@ -155,7 +156,7 @@ class sendTelegram(object):
                 
         except Exception as e:
             logger.error('Attention: send file failed!')
-            logger.error(e.message)
+            logger.error(e)
             return False
         else:
             if ret.status_code == 200:

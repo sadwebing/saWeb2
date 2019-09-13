@@ -5,7 +5,7 @@ from django.http                    import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf   import csrf_exempt, csrf_protect
 from django.contrib.auth.forms      import AuthenticationForm
 from saWeb2                         import settings
-from control.userMiddlecont         import userMc
+from control.middleware.user         import User
 import json, logging, requests, re
 
 # 获取django 自带的登入登出机制
@@ -22,7 +22,7 @@ def Login(request, authentication_form=AuthenticationForm):
     '''
         控制登陆
     '''
-    username, role, clientip = userMc(request).GetDefaultValues()
+    username, role, clientip = User(request).get_default_values()
 
     data = request.POST
 
@@ -57,15 +57,15 @@ def Logout(request):
     '''
         控制登出
     '''
-    username, role, clientip = userMc(request).GetDefaultValues()
+    username, role, clientip = User(request).get_default_values()
 
     data = request.POST
 
     # 登出
     logger.info('%s logout' %username)
-    retData = {"code": 1001, "msg": "您已登出"}
+    ret_data = {"code": 1001, "msg": "您已登出"}
     auth_logout(request)
-    return HttpResponse(json.dumps(retData))
+    return HttpResponse(json.dumps(ret_data))
 
 @csrf_exempt
 # @login_required
@@ -73,14 +73,14 @@ def userSession(request):
     '''
         控制登陆和登出
     '''
-    username, role, clientip = userMc(request).GetDefaultValues()
+    username, role, clientip = User(request).get_default_values()
 
     data = request.POST
 
     # 判断是否登入
     if not request.user.is_authenticated:
-        retData = {"code": 1001, "msg": "请重新登陆"}
-        return HttpResponse(json.dumps(retData))
+        ret_data = {"code": 1001, "msg": "请重新登陆"}
+        return HttpResponse(json.dumps(ret_data))
 
     # 返回新的token
     logger.info('%s login' %username)

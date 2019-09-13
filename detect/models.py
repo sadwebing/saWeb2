@@ -1,7 +1,7 @@
 # coding: utf8
 from django.db    import models
 from django.utils import timezone
-from control.configMiddlecont import choices_s
+from control.middleware.config import choices_s
 # from dns.models      import cf_account
 
 import datetime, pytz
