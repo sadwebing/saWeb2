@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http                    import HttpResponse
 from django.views.decorators.csrf   import csrf_exempt, csrf_protect
 from saWeb2                         import settings
-from control.middleware.config      import ret_data
+from control.middleware.config      import RET_DATA
 
 # 装饰器
 from functools import wraps

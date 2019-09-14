@@ -16,7 +16,7 @@ logger = logging.getLogger('django')
 choices_s = ((1, '启用'), (0, '禁用'),)
 
 # 初始化返回给前端的数据
-ret_data = {'code': 1001, 'msg': '请重新登陆'}
+RET_DATA = {'code': 1001, 'msg': '请重新登陆'}
 
 # telegram api
 TELEGRAM_API = {

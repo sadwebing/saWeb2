@@ -1,6 +1,6 @@
 #-_- coding: utf-8 -_-
 from saWeb2                    import settings
-from control.middleware.config import ret_data
+from control.middleware.config import RET_DATA
 
 # 装饰器
 from functools import wraps

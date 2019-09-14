@@ -10,7 +10,7 @@ from detect.models                  import department_user_t, telegram_chat_grou
 from detect.telegram                import SendTelegram
 from saWeb2                         import settings
 from control.middleware.user         import User, login_required_layui
-from control.middleware.config       import ret_data, MESSAGE_TEST
+from control.middleware.config       import RET_DATA, MESSAGE_TEST
 from control.middleware.common       import IsSomeType
 
 import re
@@ -92,43 +92,51 @@ def telegram_sendgroupmessage(request):
     '''
     username, role, clientip = User(request).get_default_values()
 
+    # 初始化返回数据
+    ret_data = RET_DATA.copy()
     ret_data['code'] = 0 # 请求正常，返回 0
+    ret_data['msg']  = '未发送任何消息'
+
+    # 初始化 telegram 信息
+    message = MESSAGE_TEST.copy()
 
     # time.sleep(5)
 
     if request.method == 'POST':
-        message = MESSAGE_TEST
-
+        
         data = request.POST
 
         # 检查群组是否为空
-        # if 'group' not in data or not data['group']: 
-        #     ret_data['msg'] = 'TG群组为空，请检查！'
-        #     return HttpResponse(json.dumps(ret_data))
-        # else:
-        #     message['group'] = data['group']
+        if 'group' not in data or not data['group']: 
+            ret_data['msg'] = 'TG群组为空，请检查！'
+            return HttpResponse(json.dumps(ret_data))
+        else:
+            message['group'] = data['group']
 
         # 检查是否有图片
-        if 'file' in request.FILES and request.FILES['file']:
-            img = request.FILES['file']
+        if 'files[]' in request.FILES and request.FILES.getlist('files[]'):
+            # request.FILES 是一个 MultiValueDict，如果传入的参数是一个数组，需要通过 getlist 方法来获取列表数据
+            for img in request.FILES.getlist('files[]'):
+                logger.info(img)
+                # 判断文件是不是 gif
+                s = SendTelegram(message)
+                if str(img)[-3:] == "gif":
+                    r = s.send_document(img)
+                else:
+                    r = s.send_photo(img)
 
-            # 判断文件是不是 gif
-            s = SendTelegram(message)
-            if str(img)[-3:] == "gif":
-                r = s.send_document(img)
-            else:
-                r = s.send_photo(img)
+                logger.info(message)
 
-            if r:
-                ret_data['msg']  = '图片发送成功'
-            else:
-                ret_data['code'] = 500
-                ret_data['msg']  = '图片发送失败'
-            return HttpResponse(json.dumps(ret_data))
+                if r:
+                    ret_data['msg']  = '图片发送成功'
+                else:
+                    ret_data['code'] = 500
+                    ret_data['msg']  = '图片发送失败'
+                    return HttpResponse(json.dumps(ret_data))
 
         # 检查信息是否为空
         if 'text' not in data or not data['text']: 
-            ret_data['msg'] = '信息为空，请检查！'
+            # ret_data['msg'] = '信息为空，请检查！'
             return HttpResponse(json.dumps(ret_data))
 
         # 获取需要@的部门或组
