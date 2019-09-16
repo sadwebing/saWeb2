@@ -23,8 +23,9 @@
                     <label class="layui-form-label">CF 账号：</label>
                     <div class="layui-input-block">
                         <select name="cf_account" lay-verify="cf_account" xm-select="cf_account" xm-select-show-count=2 xm-select-search xm-select-skin="warm">
-                            {{#  for (var cf_acc in d.data){ }}
-                            <option value="{{ d.data[cf_acc].name }}">{{ d.data[cf_acc].name }}</option>
+                            {{ layui.setter.cf_acc_list = d.data }}
+                            {{#  for (var index in d.data){ }}
+                            <option value="{{ d.data[index].name }}">{{ d.data[index].name }}</option>
                             {{#  }; }}
                           </select>
                     </div>
