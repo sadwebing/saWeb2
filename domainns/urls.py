@@ -4,8 +4,9 @@ from django.views.generic.base import RedirectView
 from . import views
 
 urlpatterns = [
-    url('^$', views.Index, name='Index'),
-    url('index$', views.Index, name='Index'),
+    # CloudFlare
+    url('cloudflare/get_accounts$', views.get_cf_accounts, name='GetCfAccounts'), # 获取CF账号列表
+
     # url('get_domains$', views.GetDomains, name='GetDomains'),
     # url('send_telegram$', views.SendTelegram, name='SendTelegram'),
     # url('get_at_users$', views.get_at_users, name='getAtUsers'),

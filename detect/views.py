@@ -9,9 +9,9 @@ from detect.models                  import DepartmentUserTb, TelegramChatGroupTb
 # from accounts.limit                 import LimitAccess
 from detect.telegram                import SendTelegram
 from saWeb2                         import settings
-from control.middleware.user         import User, login_required_layui
-from control.middleware.config       import RET_DATA, MESSAGE_TEST
-from control.middleware.common       import IsSomeType
+from control.middleware.user        import User, login_required_layui, is_authenticated_to_request
+from control.middleware.config      import RET_DATA, MESSAGE_TEST
+from control.middleware.common      import IsSomeType
 
 import re
 import json
@@ -23,6 +23,7 @@ logger = logging.getLogger('django')
 
 @csrf_exempt
 @login_required_layui
+@is_authenticated_to_request
 # @login_required
 def telegram_group(request):
     '''
@@ -36,8 +37,6 @@ def telegram_group(request):
     # 获取需要@的群组人员
     atUsers = {}
     if request.user.is_superuser:
-        atUsersSelects = DepartmentUserTb.objects.filter(status=1).all()
-    elif role == "sa":
         atUsersSelects = DepartmentUserTb.objects.filter(status=1).all()
     else:
         atUsersSelects = DepartmentUserTb.objects.filter(status=1).all()
@@ -85,6 +84,7 @@ def telegram_group(request):
 
 @csrf_exempt
 @login_required_layui
+@is_authenticated_to_request
 # @login_required
 def telegram_sendgroupmessage(request):
     '''
@@ -142,7 +142,7 @@ def telegram_sendgroupmessage(request):
 
         # 获取需要@的部门或组
         atUsers = []
-        if 'atUsers' in data and not data['atUsers']: 
+        if 'atUsers' in data and data['atUsers']: 
             atUsersDepList = [ int(id) for id in data['atUsers'].replace(' ', '').split(',') if IsSomeType(id).is_int() ]
             atUsersSelects = DepartmentUserTb.objects.filter(status=1, id__in=atUsersDepList).all()
             for department in atUsersSelects:

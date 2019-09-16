@@ -5,6 +5,7 @@ from django.http                    import HttpResponse
 from django.views.decorators.csrf   import csrf_exempt, csrf_protect
 from saWeb2                         import settings
 from control.middleware.config      import RET_DATA
+from control.models                 import UserPermissionsTb
 
 # 装饰器
 from functools import wraps
@@ -67,4 +68,36 @@ def login_required_layui(func):
             return HttpResponse(json.dumps(ret_data))
         else:
             return func(request, *args, **kwargs)
+    return wrapper
+
+def is_authenticated_to_request(func):
+    """
+        装饰器：用户请求接口前，判断是否有权限
+    """
+
+    # 初始化返回数据
+    ret_data = RET_DATA.copy()
+    ret_data['code'] = 403 # 没有权限
+    ret_data['msg']  = '您没有权限请求此接口'
+
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_superuser:
+            return func(request, *args, **kwargs)
+        
+        try:
+            user_web_uri_p = UserPermissionsTb.objects.get(user=request.user)
+            uri_list = [ per.uri.strip() for per in user_web_uri_p.weburi_p.filter(status=1).all() ] # 获取单独用户的权限
+
+            for group in user_web_uri_p.usergroup_p.filter(status=1).all(): # 循环将组权限 分配给用户
+                for per in group.weburi_p.filter(status=1).all():
+                    if per.uri.strip() not in uri_list: uri_list.append(per.uri.strip())
+
+            if request.path in uri_list: # 判断是否有权限
+                return func(request, *args, **kwargs)
+            else:
+                return HttpResponse(json.dumps(ret_data))
+        except Exception as e:
+            return HttpResponse(json.dumps(ret_data))
+
     return wrapper

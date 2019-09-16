@@ -49,3 +49,9 @@ MESSAGE_ONLINE = {
     'parse_mode': "HTML",
     'doc_file': "message.txt",
 }
+
+#cloudflare api
+CF_URL = 'https://api.cloudflare.com/client/v4/zones'
+
+#dnspod api
+DNSPOD_URL = 'https://dnsapi.cn/'

@@ -1,3 +1,5 @@
-from django.contrib import admin
+from django.contrib  import admin
+from domainns.models import CfAccountTb, DnspodAccountTb
 
-# Register your models here.
+admin.site.register(CfAccountTb)
+admin.site.register(DnspodAccountTb)
