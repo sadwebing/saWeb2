@@ -6,7 +6,7 @@
 
 import requests, sys, os
 import datetime, json, logging, re
-from detect.models      import telegram_user_id_t, telegram_chat_group_t
+from detect.models      import TelegramUserIdTb, TelegramChatGroupTb
 from saWeb2             import settings
 from control.middleware import config
 
@@ -58,9 +58,9 @@ class SendTelegram(object):
         self.__message['disable_web_page_preview'] = False if 'disable_web_page_preview' in message and str(message['disable_web_page_preview']).lower() == 'false' else True
 
         try: 
-            self.__message['chat_id'] = telegram_chat_group_t.objects.get(group=group).group_id 
+            self.__message['chat_id'] = TelegramChatGroupTb.objects.get(group=group).group_id 
         except: 
-            self.__message['chat_id'] = telegram_chat_group_t.objects.get(group="arno_test").group_id 
+            self.__message['chat_id'] = TelegramChatGroupTb.objects.get(group="arno_test").group_id 
 
     def get_at_users(self, text):
         regCp  = re.compile('[A-Za-z0-9]+(?![A-Za-z0-9])', re.I)
@@ -72,7 +72,7 @@ class SendTelegram(object):
 
         if user_l:
             user_id_l = {}
-            s = telegram_user_id_t.objects.all()
+            s = TelegramUserIdTb.objects.all()
             for i in s:
                 user_id_l[i.user] = {}
                 user_id_l[i.user]['name']    = i.name
