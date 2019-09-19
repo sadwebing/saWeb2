@@ -2,7 +2,7 @@
 <title>CloudFlare</title>
 
 <div class="layui-card layadmin-header">
-  <div class="layui-breadcrumb" lay-filter="breadcrumb">
+  <div class="layui-breadcrumb" lay-filter="breadcrumb-cf">
     <a lay-href="">主页</a>
     <a><cite>CloudFlare</cite></a>
   </div>
@@ -14,170 +14,210 @@
       <div class="layui-card">
         <div class="layui-card-header">获取CF账号 / 抓取域名 / 获取解析</div>
         <div class="layui-card-body">
-          <div class="layui-form" action="" lay-filter="cloudflare-form-element">
+          <div class="layui-form" lay-filter="cloudflare-form-element">
             <form class="layui-row layui-col-space10 layui-form-item">
 
-              <script type="text/html" template lay-url="/domainns/cloudflare/get_accounts" lay-done="layui.use(['form', 'formSelects'],function(){layui.form.render();layui.formSelects.render();layer.close(loading1_iii);})">
-
-                  <div class="layui-col-lg6">
-                    <label class="layui-form-label">CF 账号：</label>
-                    <div class="layui-input-block">
-                        <select name="cf_account" lay-verify="cf_account" xm-select="cf_account" xm-select-show-count=2 xm-select-search xm-select-skin="warm">
-                            {{ layui.setter.cf_acc_list = d.data }}
-                            {{#  for (var index in d.data){ }}
-                            <option value="{{ d.data[index].name }}">{{ d.data[index].name }}</option>
-                            {{#  }; }}
-                          </select>
-                    </div>
+              <script type="text/html" template lay-url="/domainns/cloudflare/get_accounts" lay-done="layui.data.done(d);">
+                <div class="layui-col-lg4">
+                  <label class="layui-form-label">CF 账号：</label>
+                  <div class="layui-input-block">
+                      <select name="cf_account" id="cf_account" lay-verify="cf_account" xm-select="cf_account" xm-select-show-count=1 xm-select-height="50px" xm-select-search="" xm-select-search-type="dl" xm-select-skin="warm">
+                          {{ layui.setter.cf_acc_list = d.data }}
+                          {{#  for (var index in d.data){ }}
+                          <option value="{{ d.data[index].name }}">{{ d.data[index].name }}</option>
+                          {{#  }; }}
+                        </select>
                   </div>
-
-                  <div class="layui-col-lg6">
-                    <label class="layui-form-label">域名：</label>
-                    <div class="layui-input-block">
-                      <select name="atUsers" lay-verify="atUsers" xm-select="atUsers" xm-select-skin="default" xm-select-show-count=1 xm-select-search>
-                        <option value=""></option>
-
-                      </select>
-                    </div>
+                </div>
+                <div class="layui-col-lg4">
+                  <label class="layui-form-label">域名：</label>
+                  <div class="layui-input-block">
+                    <select name="cf_domains" lay-verify="cf_domains" xm-select="cf_domains" xm-select-skin="default" xm-select-height="50px" xm-select-show-count=2 xm-select-search="" xm-select-search-type="dl">
+                    </select>
                   </div>
-
+                </div>
+                <div class="layui-col-lg4">
+                  <div>
+                    <button name="cfDomainsSendButton" id="cfDomainsSendButton" class="layui-btn" lay-submit lay-filter="cloudflare-form-element" data-type="loading1">查询</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                  </div>
+                </div>
               </script>
             </from>
-            <div class="layui-form-item">
-              <div class="layui-input-block">
-                <button name="telegramSendButton" id="telegramSendButton" class="layui-btn" lay-submit lay-filter="cloudflare-form-element" data-type="loading1">查询</button>
-                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
-              </div>
-            </div>
           </div>
+          <table class="layui-table" id="cf_domains_table" name="cf_domains_table" lay-filter="cf_domains_table"></table>
+            
+            <div class="layui-form-item">
+              <script type="text/html" id="cf_domains_table_toolbar">
+                <div class="layui-inline">
+                  <input class="layui-input" name="cf_domain_search_input" id="cf_domain_search_input">
+                </div>
+                <button class="layui-btn" lay-event="cf_domain_search">搜索</button>
+                <button class="layui-btn" lay-event="cf_domain_edit">编辑</button>
+              </script>
+
+              <script type="text/html" id="cf_domains_table_bar">
+                <a class="layui-btn layui-btn-xs" lay-event="cf_domain_add">新增</a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="cf_domain_del">删除</a>
+              </script>
+            </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<script src="/static/custom/tablejs/domainns/cloudflare_index.js"></script>
+
 <script>
-layui.use(['admin', 'form', 'formSelects', 'upload'], function(){
+// 等待的弹层
+function loading1(){
+  loading1_iii = layui.layer.load(2, {
+      shade: [0.1,'#fff']
+    });
+  };
+
+// 在请求完账号数据后，加入表单监听
+layui.data.done = function(d){
+  layui.use(['form', 'element', 'formSelects'], function(){
+    var $ = layui.$
+    ,form = layui.form
+    ,element = layui.element
+    ,formSelects = layui.formSelects;
+
+    form.render(null, 'cloudflare-form-element');
+    element.render('breadcrumb', 'breadcrumb-cf');
+    // 初始化下拉选框
+    formSelects.render('cf_domains');
+    formSelects.render('cf_account', {
+      template: function(name, value, selected, disabled){
+          var email = "";
+          for (index in layui.setter.cf_acc_list){
+            var cf_acc = layui.setter.cf_acc_list[index];
+            if (value.name == cf_acc.name){
+              email = cf_acc.email;
+            }
+          }
+          return value.name + '<span style="position: absolute; right: 0; color: #A0A0A0; font-size: 12px;">' + email + '</span>';
+      }
+    });
+
+    // 关闭弹层
+    layer.close(loading1_iii);
+
+    // 监听 cf_account
+    formSelects.on('cf_account', (id, vals, val, isAdd, isDisabled)=>{
+      // 将新的数据加入 cf_domains
+      var arr = new Array();
+      for (index in vals){
+        var name = vals[index].value;
+        for (index2 in layui.setter.cf_acc_list){
+          var cf_acc = layui.setter.cf_acc_list[index2];
+
+          if (name == cf_acc.name){
+            arr.push({"name": name, "type": "optgroup"})
+            for (index3 in cf_acc.domain){
+              var domain = cf_acc.domain[index3];
+              arr.push({"name": domain['name'], "value": [name, domain['name'], domain['id']].join('_')})
+              // arr.push({"name": domain['name'], "value": {'cf_acc': name, 'domain': domain} })
+            }
+          }
+        }
+      };
+      //local模式
+      formSelects.data('cf_domains', 'local', {
+          arr: arr
+      });
+    }, true);
+  });
+};
+
+layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
   var $ = layui.$
   ,admin = layui.admin
   ,element = layui.element
   ,form = layui.form
   ,upload = layui.upload
+  ,table = layui.table
   ,formSelects = layui.formSelects;
 
-  //多文件列表示例
-  var demoListView = $('#demoList')
-  ,uploadListIns = upload.render({
-    elem: '#upload_img'
-    ,url: '/detect/telegram/sendgroupmessage'
-    ,accept: 'file'
-    ,async: false
-    ,multiple: true
-    ,auto: false
-    // ,bindAction: '#telegramSendButton'
-    ,bindAction: false
-    ,choose: function(obj){   
-      var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
-      //读取本地文件
-      obj.preview(function(index, file, result){
-        var tr = $(['<tr id="upload-'+ index +'">'
-          ,'<td>'+ file.name +'</td>'
-          ,'<td>'+ (file.size/1014).toFixed(1) +'kb</td>'
-          ,'<td>等待上传</td>'
-          ,'<td>'
-            ,'<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>'
-            ,'<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
-          ,'</td>'
-        ,'</tr>'].join(''));
-        
-        //单个重传
-        tr.find('.demo-reload').on('click', function(){
-          obj.upload(index, file);
-        });
-        
-        //删除
-        tr.find('.demo-delete').on('click', function(){
-          delete files[index]; //删除对应的文件
-          tr.remove();
-          uploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
-        });
-        
-        demoListView.append(tr);
-      });
-    }
-    ,done: function(res, index, upload){
-      if(res.code == 0){ //上传成功
-        var tr = demoListView.find('tr#upload-'+ index)
-        ,tds = tr.children();
-        tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
-        // tds.eq(3).html(''); //清空操作
-        // return delete this.files[index]; //删除文件队列已经上传成功的文件
-        layer.msg(res.msg, {
-          offset: '15px'
-          ,icon: 1
-          ,time: 1000
-        });
-        // sendText(this.send_text, this.data);
-        return false;
-      };
-      
-      this.error(index, upload);
-    }
-    ,error: function(index, upload){
-      var tr = demoListView.find('tr#upload-'+ index)
-      ,tds = tr.children();
-      tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
-      tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
-    }
-  });
-
-  // 等待的弹层
-  function loading1(){
-    loading1_iii = layer.load(2, {
-        shade: [0.1,'#fff']
-      });
-      // setTimeout(function(){
-      //   layer.close(iii)
-      // }, 3000);
-    };
+  // console.log('1111')
 
   loading1.call(this); // 打开 等待的弹层
 
-  // 样式初始化
-  form.render(null, 'cloudflare-form-element');
-  element.render('breadcrumb', 'breadcrumb');
+  // 提交表单
+  form.on('submit(cloudflare-form-element)', function(data){
+    var type = $(this).data('type');
 
-  // 验证表单
-  // form.verify({
-  //     group: function(value){
-  //       if(value.length == 0){
-  //         return (content='请选择telegram 群组', offset="top");
-  //       }
-  //     }
-  //     // ,text: function(value){
-  //     //   if(value.length == 0){
-  //     //     return '信息不能为空';
-  //     //   }
-  //     // }
-  //   });
+    // 验证表单
+    if (data.field.cf_account == ""){
+      layer.msg('请选择CF 账号', {
+          offset: '15px'
+          ,shift: 6
+          ,icon: 5
+          ,time: 1000
+      });
+      return false;
+    }
+    if (data.field.cf_domains == ""){
+      layer.msg('请要查询的选择域名', {
+          offset: '15px'
+          ,shift: 6
+          ,icon: 5
+          ,time: 1000
+      });
+      return false;
+    }
+  
+    // 关闭select
+    formSelects.closed('cf_domains');
 
-  // admin 请求
-  function sendpicture(data){
-    admin.req({
-      url: '/detect/telegram/sendgroupmessage' //实际使用请改成服务端真实接口code == 1001
-      ,method: "post" 
-      ,data: data
-      ,processData: false
-      ,contentType: false
-      // ,async: false
-      ,done: function(res){
+    // 初始化所选数据
+    var postData = new Array();
+
+    for (value in data.field.cf_domains.split(',')){
+      var item = data.field.cf_domains.split(',')[value].split('_');
+      postData.push({'cf_acc': item[0], 'domain': item[1], 'zone_id': item[2]});
+    }
+
+    loading1.call(this); // 打开 等待的弹层
+
+    table.render({
+      elem: '#cf_domains_table'
+        // ,data: table_datas
+        ,url: '/domainns/cloudflare/get_zone_records'
+        ,method: "post"
+        ,where: {zones: postData}
+        ,contentType: 'application/json'
+        ,toolbar: "#cf_domains_table_toolbar"
+        ,defaultToolbar: ['filter']
+        ,title: 'CF域名表'
+        ,limit: 20
+        ,limits: [10, 50, 100, 500]
+        ,cols: [[
+          {type: 'checkbox', fixed: 'left'}
+          ,{field:'cf_acc', title:'CF账号', width: 100,sort:true}
+          ,{field:'zone', title:'主域名', sort:true}
+          ,{field:'name', title:'域名记录', sort:true}
+          ,{field:'type', title:'解析类型', width: 100, sort:true}
+          ,{field:'content', title:'解析记录', sort:true}
+          ,{field:'proxied', title:'是否开启CF转发', sort:true}
+          ,{field:'record_id', title:'记录ID', hide: true}
+          ,{field:'zone_id', title:'主域名ID', hide: true}
+          ,{fixed: 'right', title:'操作', toolbar: '#cf_domains_table_bar'}
+        ]]
+        ,height:600
+        ,page: true
+        ,done: function(res){
         // 发送成功的提示
         layer.msg(res.msg, {
           offset: '15px'
           ,icon: 1
           ,time: 1000
         });
-        // layer.close(loading1_iii); // 关闭 等待的弹层
+        layui.setter.cf_domains_table_data = res.data;
+        layui.setter.cf_domains_table_postdata = postData;
+        layer.close(loading1_iii); // 关闭 等待的弹层
       },success:function(res){
         if (res.code == 1001){ // 登陆失效
           layer.msg(res.msg, {
@@ -186,75 +226,17 @@ layui.use(['admin', 'form', 'formSelects', 'upload'], function(){
             ,time: 1000
           })
         };
-        // layer.close(loading1_iii);
+        layer.close(loading1_iii);
       }
-      
-    });
-  };
+    })
 
-  // 提交表单
-  form.on('submit(cloudflare-form-element)', function(data){
-    var type = $(this).data('type');
-    
-    // 验证表单中的tg群组 
-    if (data.field.group.length == 0){
-      layer.msg('请选择telegram 群组', {
-          offset: '15px'
-          ,shift: 6
-          ,icon: 5
-          ,time: 1000
-      });
-      return false;
-    }
-
-    loading1.call(this); // 打开 等待的弹层
-
-    // 将表单数据 放入图片请求里面
-    var postData = new FormData();
-    postData.append('group', data.field.group);
-    postData.append('atUsers', data.field.atUsers);
-    postData.append('text', data.field.text);
-
-    var fileNum = 0;
-    if (uploadListIns.config.files){
-      // uploadListIns.config.data = data.field;
-      // uploadListIns.upload();
-      $.each(uploadListIns.config.files, function (index, item) { 
-        postData.append('files[]', item, item.name);
-        fileNum = fileNum + 1;
-        // sendpicture(postData);
-      });
-
-      send_text = false;
-    }else {
-      send_text = true;
-      // console.log('no pics');
-    };
-
-    // 如果不是必须发送信息，取消等待的弹层
-    // if (send_text == false && data.field.text.length == 0){
-    //     layer.close(loading1_iii);
-    //     return false;
-    //   };
-
-    // 验证表单中的信息
-    if (data.field.text.replace(/\s+/g, "").length == 0 && fileNum == 0){
-      layer.msg('信息不能为空', {
-          offset: '15px'
-          ,shift: 6
-          ,icon: 5
-          ,time: 1000
-      });
-      layer.close(loading1_iii);
-      return false;
-    }
+    return false;
 
     admin.req({
-      url: '/detect/telegram/sendgroupmessage' //实际使用请改成服务端真实接口code == 1001
+      url: '/domainns/cloudflare/get_zone_records' //实际使用请改成服务端真实接口code == 1001
       ,method: "post" 
-      ,data: postData
-      ,processData: false
-      ,contentType: false
+      ,data: JSON.stringify(postData)
+      ,contentType: 'application/json'
       ,done: function(res){
         // 发送成功的提示
         layer.msg(res.msg, {
@@ -262,6 +244,12 @@ layui.use(['admin', 'form', 'formSelects', 'upload'], function(){
           ,icon: 1
           ,time: 1000
         });
+        layui.setter.cf_domains_table_data = res.data;
+        table.render({
+          elem: '#cf_domains_table'
+          ,data: res.data
+        });
+        table.resize('cf_domains_table');
         layer.close(loading1_iii); // 关闭 等待的弹层
       },success:function(res){
         if (res.code == 1001){ // 登陆失效

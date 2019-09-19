@@ -2,7 +2,7 @@
 <title>Telegram</title>
 
 <div class="layui-card layadmin-header">
-  <div class="layui-breadcrumb" lay-filter="breadcrumb">
+  <div class="layui-breadcrumb" lay-filter="breadcrumb-tg">
     <a lay-href="">主页</a>
     <a><cite>Telegram</cite></a>
   </div>
@@ -14,16 +14,17 @@
       <div class="layui-card">
         <div class="layui-card-header">指定群组发送信息</div>
         <div class="layui-card-body">
-          <div class="layui-form" action="" lay-filter="component-form-element">
+          <div class="layui-form" lay-filter="component-form-element">
             <form class="layui-row layui-col-space10 layui-form-item">
 
-              <script type="text/html" template lay-url="/detect/telegram" lay-done="layui.use(['form', 'formSelects'],function(){layui.form.render();layui.formSelects.render();layer.close(loading1_iii);})">
+              <script type="text/html" template lay-url="/detect/telegram" lay-done="layui.data.done(d);">
 
                   <div class="layui-col-lg6">
-                    <label class="layui-form-label">Tg 群组：</label>
+                    <label class="layui-form-label">Tg 群组</label>
                     <div class="layui-input-block">
-                        <select name="group" lay-verify="group" xm-select="group" xm-select-radio xm-select-search xm-select-skin="warm">
+                        <select name="group" lay-verify="group" xm-select="group" xm-select-radio xm-select-search="" xm-select-search-type="dl" xm-select-skin="warm">
                             <option value=""></option>
+                            {{ layui.setter.telegram_data = d.data }}
                             {{#  for (var group in d.data.groups){ }}
                             <option value="{{ group }}">{{ d.data.groups[group]['name'] }}</option>
                             {{#  }; }}
@@ -32,12 +33,12 @@
                   </div>
 
                   <div class="layui-col-lg6">
-                    <label class="layui-form-label">员工 组：</label>
+                    <label class="layui-form-label">员工 组</label>
                     <div class="layui-input-block">
-                      <select name="atUsers" lay-verify="atUsers" xm-select="atUsers" xm-select-skin="default" xm-select-show-count=1 xm-select-search>
+                      <select name="atUsers" lay-verify="atUsers" xm-select="atUsers" xm-select-skin="default" xm-select-show-count=3 xm-select-height="50px" xm-select-search="" xm-select-search-type="dl">
                         <option value=""></option>
                         {{#  layui.each(d.data.atUsers, function(index, item){ }}
-                        <option value="{{ item.id }}" subtext="">{{ item.department }}: {{ item.display }}</option>
+                        <option value="{{ item.id }}" subtext="">{{ item.department }}</option>
                         {{#  }); }}
                       </select>
                     </div>
@@ -46,13 +47,13 @@
               </script>
             </from>
             <div class="layui-form-item">
-              <label class="layui-form-label">信息：</label>
+              <label class="layui-form-label">信息</label>
               <div class="layui-input-block">
                 <textarea name="text" lay-verify="text" placeholder="信息文本可指定@人员，例如@arno" class="layui-textarea" style="height: 180px;" required></textarea>
               </div>
             </div>
             <div class="layui-upload layui-form-item">
-                <label class="layui-form-label">图片：</label>
+                <label class="layui-form-label">图片</label>
                 <div class="layui-input-block">
                 <!-- <button type="button" class="layui-btn" id="upload_img">选择图片</button>  -->
                   <div class="layui-upload">
@@ -86,16 +87,28 @@
 </div>
 
 <script>
-
-// var loading1_iii;
-// function loading1(){
-//   loading1_iii = layer.load(1, {
-//         shade: [0.1,'#fff']
-//       });
-//       // setTimeout(function(){
-//       //   layer.close(iii)
-//       // }, 3000);
-//     };
+layui.data.done = function(d){
+  layui.form.render(null, 'component-form-element');
+  layui.element.render('breadcrumb', 'breadcrumb-tg');
+  layui.formSelects.render('group', {
+    template: function(name, value, selected, disabled){
+      return value.name + '<span style="position: absolute; right: 0; color: #A0A0A0; font-size: 12px;">' + value.value + '</span>';
+    }
+  });
+  layui.formSelects.render('atUsers', {
+    template: function(name, value, selected, disabled){
+      var display = "";
+      for (index in layui.setter.telegram_data.atUsers){
+        var item = layui.setter.telegram_data.atUsers[index]
+        if (value.value == item.id){
+          display = item.display;
+        }
+      }
+      return value.name + '<span style="position: absolute; right: 0; color: #A0A0A0; font-size: 12px;">' + display + '</span>';
+    }
+  });
+  layer.close(loading1_iii);
+};
 
 layui.use(['admin', 'form', 'formSelects', 'upload'], function(){
   var $ = layui.$
@@ -182,10 +195,6 @@ layui.use(['admin', 'form', 'formSelects', 'upload'], function(){
     };
 
   loading1.call(this); // 打开 等待的弹层
-
-  // 样式初始化
-  form.render(null, 'component-form-element');
-  element.render('breadcrumb', 'breadcrumb');
 
   // 验证表单
   // form.verify({

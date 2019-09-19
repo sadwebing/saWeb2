@@ -1,15 +1,5 @@
-$(function () {
-    public.operateInit();
-});
-
 //操作
 var public = {
-    //初始化按钮事件
-    operateInit: function () {
-        this.selectpicker();
-        //this.socketConn();
-    },
-
     ViewModel: function() {
                 var self = this;
                 self.datas = ko.observableArray();
@@ -108,7 +98,7 @@ var public = {
         });
     },
 
-    isSubDomain: function (value, proxied) {
+    isSubDomain: function (value, proxied=true) {
         var regexp = /^(@|[-_a-zA-Z0-9]+|.*[-_a-zA-Z0-9]+.*\.[-_a-zA-Z0-9]*[-_a-zA-Z]+[-_a-zA-Z0-9]*)$/;
 
         var valid = regexp.test(value);
@@ -183,6 +173,4 @@ var public = {
         
 
     },
-
-
 };

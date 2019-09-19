@@ -34,8 +34,9 @@ class Domainns(object):
             else:
                 user_p = UserPermissionsTb.objects.get(user=self.__request.user)
                 cf_acc_list = [ acc for acc in user_p.cf_account_p.all() ]
-                for cf_acc in user_p.usergroup_p.cf_account_p.all():
-                    if cf_acc not in cf_acc_list: cf_acc_list.append(cf_acc)
+                for user_group_p in user_p.usergroup_p.all():
+                    for cf_acc in user_group_p.cf_account_p.all():
+                        if cf_acc not in cf_acc_list: cf_acc_list.append(cf_acc)
 
         except Exception as e:
             logger.error(str(e))

@@ -98,6 +98,7 @@ def is_authenticated_to_request(func):
             else:
                 return HttpResponse(json.dumps(ret_data))
         except Exception as e:
+            logger.error(str(e))
             return HttpResponse(json.dumps(ret_data))
 
     return wrapper

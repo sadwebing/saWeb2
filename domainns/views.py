@@ -9,6 +9,7 @@ from control.middleware.config      import RET_DATA, MESSAGE_TEST, CF_URL
 from domainns.models                import CfAccountTb, DnspodAccountTb
 from domainns.api.cloudflare        import CfApi
 from pypinyin                       import lazy_pinyin
+from domainns.cf_views              import *
 from control.middleware.permission.domainns  import Domainns
 
 import re
@@ -51,6 +52,7 @@ def get_cf_accounts(request):
         total_pages = result['result_info']['total_pages']
         tmp_dict = {
             'name':      cf_acc.name,
+            'email':     cf_acc.email,
             'cf_acc_py': lazy_pinyin(cf_acc.name), # 将账号按照中文拼音进行排序
             'domain':    [],
             }
@@ -71,4 +73,5 @@ def get_cf_accounts(request):
     ret_data['data'].sort(key=lambda acc: acc['cf_acc_py']) # cf_acc 拼音排序
 
     return HttpResponse(json.dumps(ret_data))
+
 

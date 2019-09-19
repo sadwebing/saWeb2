@@ -6,6 +6,10 @@ from . import views
 urlpatterns = [
     # CloudFlare
     url('cloudflare/get_accounts$', views.get_cf_accounts, name='GetCfAccounts'), # 获取CF账号列表
+    url('cloudflare/get_zone_records$', views.get_zone_records, name='GetZoneRecords'),
+    url('cloudflare/update_records$', views.update_records, name='UpdateRecords'),
+    url('cloudflare/delete_records$', views.delete_records, name='DeleteRecords'),
+    url('cloudflare/add_records$', views.add_records, name='AddRecords'),
 
     # url('get_domains$', views.GetDomains, name='GetDomains'),
     # url('send_telegram$', views.SendTelegram, name='SendTelegram'),
