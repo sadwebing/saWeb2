@@ -64,6 +64,8 @@ def get_zone_records(request):
         ret_data['code'] = 500
         ret_data['msg']  = '获取域名信息失败: %s' %str(e)
 
+    ret_data['count'] = len(ret_data['data'])
+
     return HttpResponse(json.dumps(ret_data))
 
 @csrf_exempt

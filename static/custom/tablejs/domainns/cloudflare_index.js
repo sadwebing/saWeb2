@@ -11,12 +11,11 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
   table.set({
     elem: '#cf_domains_table'
       // ,data: table_datas
-      ,url: false
       ,toolbar: "#cf_domains_table_toolbar"
       ,defaultToolbar: ['filter']
       ,title: 'CF域名表'
       ,limit: 20
-      ,limits: [10, 50, 100, 500]
+      ,limits: [20, 50, 100, 500]
       ,cols: [[
         {type: 'checkbox', fixed: 'left'}
         ,{field:'cf_acc', title:'CF账号', width: 100,sort:true}
@@ -60,7 +59,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
             offset: '15px'
             ,shift: 6
             ,icon: 5
-            ,time: 1000
+            ,time: 1500
         });
         return false;
         }
@@ -141,7 +140,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                   offset: '15px'
                   ,shift: 6
                   ,icon: 5
-                  ,time: 1000
+                  ,time: 1500
               });
               return false;
             }
@@ -150,7 +149,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                   offset: '15px'
                   ,shift: 6
                   ,icon: 5
-                  ,time: 1000
+                  ,time: 1500
               });
               return false;
             }
@@ -159,7 +158,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 offset: '15px'
                 ,shift: 6
                 ,icon: 5
-                ,time: 1000
+                ,time: 1500
               });
               return false;
             }else if (postData.type == "CNAME" && ! public.isDomain(postData.content)){
@@ -167,7 +166,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 offset: '15px'
                 ,shift: 6
                 ,icon: 5
-                ,time: 1000
+                ,time: 1500
               });
               return false;
             }
@@ -184,12 +183,12 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 layer.msg(res.msg, {
                   offset: '15px'
                   ,icon: 1
-                  ,time: 1000
+                  ,time: 1500
                 });
                 layer.close(loading1_iii); // 关闭 等待的弹层
                 // 当查询的主域名超过10 个，不自动刷新
                 if (layui.setter.cf_domains_table_postdata.length < 10){
-                  table.reload('cf_domains_table');
+                  document.getElementById("cfDomainsSendButton").click();
                   layer.close(index); // 关闭当前页
                 }
               },success:function(res){
@@ -197,7 +196,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                   layer.msg(res.msg, {
                     offset: '15px'
                     ,icon: 1
-                    ,time: 1000
+                    ,time: 1500
                   })
                 };
                 layer.close(loading1_iii);
@@ -239,7 +238,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
               layer.msg(res.msg, {
                 offset: '15px'
                 ,icon: 1
-                ,time: 1000
+                ,time: 1500
               });
               layer.close(loading1_iii); // 关闭 等待的弹层
               layer.close(index);
@@ -249,7 +248,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 layer.msg(res.msg, {
                   offset: '15px'
                   ,icon: 1
-                  ,time: 1000
+                  ,time: 1500
                 })
               };
               layer.close(loading1_iii);
@@ -330,7 +329,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                   offset: '15px'
                   ,shift: 6
                   ,icon: 5
-                  ,time: 1000
+                  ,time: 1500
               });
               return false;
             }
@@ -342,7 +341,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
               offset: '15px'
               ,shift: 6
               ,icon: 5
-              ,time: 1000
+              ,time: 1500
             });
             return false;
           }
@@ -351,7 +350,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 offset: '15px'
                 ,shift: 6
                 ,icon: 5
-                ,time: 1000
+                ,time: 1500
             });
             return false;
           }
@@ -360,7 +359,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 offset: '15px'
                 ,shift: 6
                 ,icon: 5
-                ,time: 1000
+                ,time: 1500
             });
             return false;
           }
@@ -369,7 +368,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
               offset: '15px'
               ,shift: 6
               ,icon: 5
-              ,time: 1000
+              ,time: 1500
             });
             return false;
           }else if (postData.type == "CNAME" && ! public.isDomain(postData.content)){
@@ -377,7 +376,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
               offset: '15px'
               ,shift: 6
               ,icon: 5
-              ,time: 1000
+              ,time: 1500
             });
             return false;
           }
@@ -394,12 +393,13 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
               layer.msg(res.msg, {
                 offset: '15px'
                 ,icon: 1
-                ,time: 1000
+                ,time: 1500
               });
               layer.close(loading1_iii); // 关闭 等待的弹层
               // 当查询的主域名超过10 个，不自动刷新
               if (layui.setter.cf_domains_table_postdata.length < 10){
-                table.reload('cf_domains_table');
+                // table.reload('cf_domains_table');
+                document.getElementById("cfDomainsSendButton").click();
                 layer.close(index); // 关闭当前页
               }
             },success:function(res){
@@ -407,7 +407,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 layer.msg(res.msg, {
                   offset: '15px'
                   ,icon: 1
-                  ,time: 1000
+                  ,time: 1500
                 })
               };
               layer.close(loading1_iii);

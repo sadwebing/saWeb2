@@ -155,22 +155,19 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
           offset: '15px'
           ,shift: 6
           ,icon: 5
-          ,time: 1000
+          ,time: 1500
       });
       return false;
     }
     if (data.field.cf_domains == ""){
-      layer.msg('请要查询的选择域名', {
+      layer.msg('请选择要查询的域名', {
           offset: '15px'
           ,shift: 6
           ,icon: 5
-          ,time: 1000
+          ,time: 1500
       });
       return false;
     }
-  
-    // 关闭select
-    formSelects.closed('cf_domains');
 
     // 初始化所选数据
     var postData = new Array();
@@ -182,69 +179,51 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
 
     loading1.call(this); // 打开 等待的弹层
 
-    table.render({
-      elem: '#cf_domains_table'
-        // ,data: table_datas
-        ,url: '/domainns/cloudflare/get_zone_records'
-        ,method: "post"
-        ,where: {zones: postData}
-        ,contentType: 'application/json'
-        ,toolbar: "#cf_domains_table_toolbar"
-        ,defaultToolbar: ['filter']
-        ,title: 'CF域名表'
-        ,limit: 20
-        ,limits: [10, 50, 100, 500]
-        ,cols: [[
-          {type: 'checkbox', fixed: 'left'}
-          ,{field:'cf_acc', title:'CF账号', width: 100,sort:true}
-          ,{field:'zone', title:'主域名', sort:true}
-          ,{field:'name', title:'域名记录', sort:true}
-          ,{field:'type', title:'解析类型', width: 100, sort:true}
-          ,{field:'content', title:'解析记录', sort:true}
-          ,{field:'proxied', title:'是否开启CF转发', sort:true}
-          ,{field:'record_id', title:'记录ID', hide: true}
-          ,{field:'zone_id', title:'主域名ID', hide: true}
-          ,{fixed: 'right', title:'操作', toolbar: '#cf_domains_table_bar'}
-        ]]
-        ,height:600
-        ,page: true
-        ,done: function(res){
-        // 发送成功的提示
-        layer.msg(res.msg, {
-          offset: '15px'
-          ,icon: 1
-          ,time: 1000
-        });
-        layui.setter.cf_domains_table_data = res.data;
-        layui.setter.cf_domains_table_postdata = postData;
-        layer.close(loading1_iii); // 关闭 等待的弹层
-      },success:function(res){
-        if (res.code == 1001){ // 登陆失效
-          layer.msg(res.msg, {
-            offset: '15px'
-            ,icon: 1
-            ,time: 1000
-          })
-        };
-        layer.close(loading1_iii);
-      }
-    })
+    // table.render({
+    //   elem: '#cf_domains_table'
+    //     // ,data: table_datas
+    //     ,url: '/domainns/cloudflare/get_zone_records'
+    //     ,method: "post"
+    //     ,where: {zones: postData}
+    //     ,contentType: 'application/json'
+    //     ,done: function(res){
+    //       // 发送成功的提示
+    //       layer.msg(res.msg, {
+    //         offset: '15px'
+    //         ,icon: 1
+    //         ,time: 1500
+    //       });
+    //       layui.setter.cf_domains_table_data = res.data;
+    //       layui.setter.cf_domains_table_postdata = postData;
+    //       layer.close(loading1_iii); // 关闭 等待的弹层
+    //     },success:function(res){
+    //     if (res.code == 1001){ // 登陆失效
+    //       layer.msg(res.msg, {
+    //         offset: '15px'
+    //         ,icon: 1
+    //         ,time: 1500
+    //       })
+    //     };
+    //     layer.close(loading1_iii);
+    //   }
+    // })
 
-    return false;
+    // return false;
 
     admin.req({
       url: '/domainns/cloudflare/get_zone_records' //实际使用请改成服务端真实接口code == 1001
       ,method: "post" 
-      ,data: JSON.stringify(postData)
+      ,data: JSON.stringify({zones: postData})
       ,contentType: 'application/json'
       ,done: function(res){
         // 发送成功的提示
         layer.msg(res.msg, {
           offset: '15px'
           ,icon: 1
-          ,time: 1000
+          ,time: 1500
         });
         layui.setter.cf_domains_table_data = res.data;
+        layui.setter.cf_domains_table_postdata = postData;
         table.render({
           elem: '#cf_domains_table'
           ,data: res.data
@@ -256,7 +235,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
           layer.msg(res.msg, {
             offset: '15px'
             ,icon: 1
-            ,time: 1000
+            ,time: 1500
           })
         };
         layer.close(loading1_iii);

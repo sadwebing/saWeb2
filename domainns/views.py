@@ -68,6 +68,7 @@ def get_cf_accounts(request):
             page += 1
             result = cfapi.get_dns_lists(page=page)
         ret_data['data'].append(tmp_dict)
+        break
 
     #logger.info(ret_data['data'])
     ret_data['data'].sort(key=lambda acc: acc['cf_acc_py']) # cf_acc 拼音排序
