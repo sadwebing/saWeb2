@@ -67,7 +67,7 @@
   </div>
 </div>
 
-<script src="/static/custom/tablejs/domainns/cloudflare_index.js"></script>
+<script src="/static/custom/tablejs/domainns/cloudflare.js"></script>
 
 <script>
 // 等待的弹层
@@ -224,7 +224,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
         });
         layui.setter.cf_domains_table_data = res.data;
         layui.setter.cf_domains_table_postdata = postData;
-        table.render({
+        table.reload('cf_domains_table', {
           elem: '#cf_domains_table'
           ,data: res.data
         });

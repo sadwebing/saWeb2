@@ -8,7 +8,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
   ,formSelects = layui.formSelects;
 
   // 表格初始化
-  table.set({
+  table.init('cf_domains_table', {
     elem: '#cf_domains_table'
       // ,data: table_datas
       ,toolbar: "#cf_domains_table_toolbar"
@@ -40,13 +40,22 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
         // console.log(layui.setter.cf_domains_table_data);
         var tmp_data = [];
         var search_str = document.getElementById('cf_domain_search_input').value;
+        if (! layui.setter.cf_domains_table_data){
+          layer.msg('没有任何数据', {
+            offset: '15px'
+            ,shift: 6
+            ,icon: 5
+            ,time: 1500
+          });
+          return false;
+        }
         for (index in layui.setter.cf_domains_table_data){
           var zone = layui.setter.cf_domains_table_data[index];
           if (zone['name'].indexOf(search_str) > -1 || zone['content'].indexOf(search_str) > -1){
             tmp_data.push(zone);
           }
         }
-        table.render({
+        table.reload('cf_domains_table', {
           elem: '#cf_domains_table'
           ,data: tmp_data
         });
@@ -188,6 +197,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 layer.close(loading1_iii); // 关闭 等待的弹层
                 // 当查询的主域名超过10 个，不自动刷新
                 if (layui.setter.cf_domains_table_postdata.length < 10){
+                  loading1.call(this); // 打开 等待的弹层
                   document.getElementById("cfDomainsSendButton").click();
                   layer.close(index); // 关闭当前页
                 }
@@ -399,6 +409,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
               // 当查询的主域名超过10 个，不自动刷新
               if (layui.setter.cf_domains_table_postdata.length < 10){
                 // table.reload('cf_domains_table');
+                loading1.call(this); // 打开 等待的弹层
                 document.getElementById("cfDomainsSendButton").click();
                 layer.close(index); // 关闭当前页
               }

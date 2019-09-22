@@ -80,7 +80,7 @@ def update_records(request):
     # 初始化返回数据
     ret_data = RET_DATA.copy()
     ret_data['code'] = 0 # 请求正常，返回 0
-    ret_data['msg']  = '修改域名信息成功'
+    ret_data['msg']  = '修改域名解析成功'
     ret_data['data'] = []
 
     try:
@@ -110,7 +110,7 @@ def update_records(request):
     except Exception as e:
         logger.error(str(e))
         ret_data['code'] = 500
-        ret_data['msg']  = '修改域名信息失败: %s' %str(e)
+        ret_data['msg']  = '修改域名解析失败: %s' %str(e)
 
     return HttpResponse(json.dumps(ret_data))
 
@@ -161,7 +161,7 @@ def delete_records(request):
 @is_authenticated_to_request
 def add_records(request):
     '''
-        删除CF 域名解析
+        新增CF 域名解析
     '''
     username, role, clientip = User(request).get_default_values()
 

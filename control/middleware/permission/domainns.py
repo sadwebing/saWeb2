@@ -43,3 +43,24 @@ class Domainns(object):
 
         return cf_acc_list
 
+    def get_dnspod_account(self):
+        '''
+            返回 DNSPOD 账号信息
+        '''
+        dnspod_acc_list = []
+
+        try:
+            if self.__request.user.is_superuser:
+                dnspod_acc_list = [ acc for acc in DnspodAccountTb.objects.all() ]
+            else:
+                user_p = UserPermissionsTb.objects.get(user=self.__request.user)
+                dnspod_acc_list = [ acc for acc in user_p.dnspod_account_p.all() ]
+                for user_group_p in user_p.usergroup_p.all():
+                    for dnspod_acc in user_group_p.dnspod_account_p.all():
+                        if dnspod_acc not in dnspod_acc_list: dnspod_acc_list.append(dnspod_acc)
+
+        except Exception as e:
+            logger.error(str(e))
+
+        return dnspod_acc_list
+

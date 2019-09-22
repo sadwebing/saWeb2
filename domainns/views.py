@@ -5,12 +5,13 @@ from django.http                    import HttpResponse
 from django.views.decorators.csrf   import csrf_exempt, csrf_protect
 from saWeb2                         import settings
 from control.middleware.user        import User, login_required_layui, is_authenticated_to_request
-from control.middleware.config      import RET_DATA, MESSAGE_TEST, CF_URL
+from control.middleware.config      import RET_DATA, MESSAGE_TEST, CF_URL, DNSPOD_URL
 from domainns.models                import CfAccountTb, DnspodAccountTb
 from domainns.api.cloudflare        import CfApi
+from domainns.api.dnspod            import DpApi
 from pypinyin                       import lazy_pinyin
 from domainns.cf_views              import *
-from control.middleware.permission.domainns  import Domainns
+from control.middleware.permission.domainns import Domainns
 
 import re
 import json
@@ -68,11 +69,57 @@ def get_cf_accounts(request):
             page += 1
             result = cfapi.get_dns_lists(page=page)
         ret_data['data'].append(tmp_dict)
-        break
 
     #logger.info(ret_data['data'])
     ret_data['data'].sort(key=lambda acc: acc['cf_acc_py']) # cf_acc 拼音排序
 
     return HttpResponse(json.dumps(ret_data))
 
+@csrf_exempt
+@login_required_layui
+@is_authenticated_to_request
+def get_dnspod_accounts(request):
+    '''
+        获取DNSPOD账号列表
+    '''
+    username, role, clientip = User(request).get_default_values()
+
+    # 初始化返回数据
+    ret_data = RET_DATA.copy()
+    ret_data['code'] = 0 # 请求正常，返回 0
+    ret_data['msg']  = '获取DNSPOD账号列表'
+    ret_data['data'] = []
+
+    # 获取DNSPOD 账号
+    dnspod_acc_list = Domainns(request).get_dnspod_account()
+
+    for dnspod_acc in dnspod_acc_list:
+
+        # 做一步异常处理
+        try:
+            dpapi = DpApi(DNSPOD_URL, dnspod_acc.key)
+        except Exception as e:
+            ret_data['code'] = 500
+            ret_data['msg']  = "查询 %s 账号失败：%s" %(dnspod_acc.name, str(e))
+            logger.error(ret_data['msg'] )
+            return HttpResponse(json.dumps(ret_data))
+        else:
+            result, status = dpapi.get_dns_lists(type='all')
+            if not status:
+                ret_data['code'] = 500
+                ret_data['msg']  = '获取DNSPOD账号列表 失败：%s' %str(result)
+                logger.error(ret_data['msg'])
+                return HttpResponse(json.dumps(ret_data))
+            else:
+                ret_data['data'].append({
+                    'name':   dnspod_acc.name,
+                    'email':  dnspod_acc.email,
+                    'domain': result['domains'],
+                    'dnspod_acc_py': lazy_pinyin(dnspod_acc.name),
+                })
+
+    #logger.info(ret_data['data'])
+    ret_data['data'].sort(key=lambda acc: acc['dnspod_acc_py']) # dnspod_acc_py 拼音排序
+
+    return HttpResponse(json.dumps(ret_data))
 
