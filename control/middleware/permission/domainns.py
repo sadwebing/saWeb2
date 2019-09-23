@@ -2,7 +2,7 @@
 from saWeb2                         import settings
 from control.middleware.config      import RET_DATA
 from control.models                 import UserPermissionsTb
-from domainns.models                import CfAccountTb, DnspodAccountTb
+from domainns.models                import CfAccountTb, DnspodAccountTb, CdnAccountTb
 
 # 装饰器
 from functools import wraps
@@ -64,3 +64,23 @@ class Domainns(object):
 
         return dnspod_acc_list
 
+    def get_cdn_account(self):
+        '''
+            返回 DNSPOD 账号信息
+        '''
+        cdn_acc_list = []
+
+        try:
+            if self.__request.user.is_superuser:
+                cdn_acc_list = [ acc for acc in CdnAccountTb.objects.filter(status=1).all() ]
+            else:
+                user_p = UserPermissionsTb.objects.get(user=self.__request.user)
+                cdn_acc_list = [ acc for acc in user_p.cdn_account_p.filter(status=1).all() ]
+                for user_group_p in user_p.usergroup_p.all():
+                    for cdn_acc in user_group_p.cdn_account_p.filter(status=1).all():
+                        if cdn_acc not in cdn_acc_list: cdn_acc_list.append(cdn_acc)
+
+        except Exception as e:
+            logger.error(str(e))
+
+        return cdn_acc_list

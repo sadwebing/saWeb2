@@ -35,7 +35,62 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
 
   //监听锁定操作
   form.on('checkbox(switch_enabled)', function(obj){
-    layer.tips(this.value + ' ' + this.name + '：'+ obj.elem.checked, obj.othis);
+    var data = JSON.parse(decodeURIComponent($(this).data('json')));
+    
+    if (obj.elem.checked){
+      data.enabled = "1";
+      var message = "域名解析已 启用";
+    }else {
+      data.enabled = "0";
+      var message = "域名解析已 禁用";
+    }
+
+    var postData = { // 获取表单数据
+      'records': [data],
+      'type': data.type,
+      'enabled': data.enabled,
+      'value': data.value
+    };
+
+    loading1.call(this); // 打开 等待的弹层
+    admin.req({
+      url: '/domainns/dnspod/update_records' //实际使用请改成服务端真实接口code == 1001
+      ,method: "post" 
+      ,data: JSON.stringify(postData)
+      ,contentType: 'application/json'
+      ,done: function(res){
+        // 发送成功的提示
+        layer.msg(message, {
+          offset: '15px'
+          ,icon: 1
+          ,time: 1500
+        });
+        // 更新原始表格中的数据
+        for (x in layui.setter.dnspod_domains_table_data){
+          if (layui.setter.dnspod_domains_table_data[x].record_id == data.record_id){
+            layui.setter.dnspod_domains_table_data[x].enabled = data.enabled;
+            break;
+          }
+        }
+
+        layer.close(loading1_iii); // 关闭 等待的弹层
+
+      },success:function(res){
+        if (res.code == 1001){ // 登陆失效
+          layer.msg(res.msg, {
+            offset: '15px'
+            ,icon: 1
+            ,time: 1500
+          })
+        };
+        layer.close(loading1_iii);
+      }
+      
+    });
+
+    // table.reload('dnspod_domains_table', {data: layui.setter.dnspod_domains_table_data});
+
+    // layer.tips(this.value + ' ' + this.name + '：'+ obj.elem.checked, obj.othis);
 
   });
 
@@ -256,6 +311,15 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 ,icon: 1
                 ,time: 1500
               });
+
+              // 更新原始表格中的数据
+              for (x in layui.setter.dnspod_domains_table_data){
+                if (layui.setter.dnspod_domains_table_data[x].record_id == data.record_id){
+                  layui.setter.dnspod_domains_table_data.splice(x, 1);
+                  break;
+                }
+              }
+
               layer.close(loading1_iii); // 关闭 等待的弹层
               layer.close(index);
               obj.del(); // 删除行

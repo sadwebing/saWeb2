@@ -6,9 +6,12 @@ from django.views.decorators.csrf   import csrf_exempt, csrf_protect
 from saWeb2                         import settings
 from control.middleware.user        import User, login_required_layui, is_authenticated_to_request
 from control.middleware.config      import RET_DATA, MESSAGE_TEST, CF_URL, DNSPOD_URL
-from domainns.models                import CfAccountTb, DnspodAccountTb
+from domainns.models                import CfAccountTb, DnspodAccountTb, DoaminProjectTb
 from domainns.api.cloudflare        import CfApi
 from domainns.api.dnspod            import DpApi
+from domainns.api.tencent           import TcApi
+from domainns.api.wangsu            import WsApi
+from domainns.api.aws               import AwsApi
 from pypinyin                       import lazy_pinyin
 from domainns.cf_views              import *
 from control.middleware.permission.domainns import Domainns
@@ -123,3 +126,71 @@ def get_dnspod_accounts(request):
 
     return HttpResponse(json.dumps(ret_data))
 
+@csrf_exempt
+@login_required_layui
+@is_authenticated_to_request
+def get_reflesh_project(request):
+    '''
+        获取 清缓存 列表数据
+    '''
+    username, role, clientip = User(request).get_default_values()
+
+    # 初始化返回数据
+    ret_data = RET_DATA.copy()
+    ret_data['code'] = 0 # 请求正常，返回 0
+    ret_data['msg']  = '获取[清缓存列表数据]成功'
+    ret_data['data'] = {'domain_project': [], 'cdn': []}
+
+    # 获取cdn 账号
+    cdn_acc_list = Domainns(request).get_cdn_account()
+
+    # 获取项目 列表
+    domain_project_list = DoaminProjectTb.objects.filter(status=1).all()
+
+    for cdn in cdn_acc_list:
+        tmpdict = {
+            'id':      cdn.id,
+            'name':    cdn.get_name_display(),
+            'account': cdn.account,
+            'domain': [],
+        }
+        if cdn.get_name_display() == "wangsu":
+            req = WsApi(cdn.secretid, cdn.secretkey)
+            results, status = req.getdomains()
+            if status:
+                for line in results:
+                    if line['enabled'] == 'true':
+                        tmpdict['domain'].append({
+                                'name': line['domain-name'],
+                                'ssl' : 1 if line['service-type']=='web-https' else 0,
+                            })
+        # elif cdn.get_name_display() == "tencent": # 腾讯云接口有问题，后面再修复
+        #     req = TcApi(cdn.secretid, cdn.secretkey)
+        #     results, status = req.getdomains()
+        #     for line in results['data']['hosts']:
+        #         if line['disabled'] == 0 and line['status'] in [3, 4, 5]:
+        #             tmpdict['domain'].append({
+        #                     'name': line['host'],
+        #                     'ssl' : 1 if line['ssl_type']!=0 else 0,
+        #                 })
+        elif cdn.get_name_display() == "aws":
+            req = AwsApi(cdn.secretid, cdn.secretkey)
+            results, status = req.getdomains(['fenghuang'])
+            if status:
+                for item in results:
+                    tmpdict['domain'].append({
+                            'Id': item['Id'],
+                            'name': item['domains'],
+                            'ssl' : 0,
+                            'product':  item['product'],
+                            'customer': item['customer']
+                        })
+        else:
+            tmpdict['domain'] = []
+        ret_data['data']['cdn'].append(tmpdict)
+        # break
+
+    #logger.info(ret_data['data'])
+    ret_data['data']['cdn'].sort(key=lambda acc: acc['name']) # CDN账号按 name的分类 排序
+
+    return HttpResponse(json.dumps(ret_data))

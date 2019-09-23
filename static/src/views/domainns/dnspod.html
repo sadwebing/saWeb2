@@ -47,7 +47,7 @@
           </div>
           <table class="layui-table" id="dnspod_domains_table" name="dnspod_domains_table" lay-filter="dnspod_domains_table"></table>
           <script type="text/html" id="switchEnabled">
-            <input type="checkbox" name="switch_enabled" id="switch_enabled" lay-filter="switch_enabled" value="{{d.enabled}}" title="启用" {{ d.enabled == 1 ? 'checked' : '' }}>
+            <input type="checkbox" name="switch_enabled" id="switch_enabled" lay-filter="switch_enabled" value="{{d.enabled}}" data-json="{{ encodeURIComponent(JSON.stringify(d)) }}" title="启用" {{ d.enabled == 1 ? 'checked' : '' }}>
           </script>
           <div class="layui-form-item">
             <script type="text/html" id="dnspod_domains_table_toolbar">

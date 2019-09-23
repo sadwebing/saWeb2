@@ -250,6 +250,15 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
                 ,icon: 1
                 ,time: 1500
               });
+
+              // 更新原始表格中的数据
+              for (x in layui.setter.cf_domains_table_data){
+                if (layui.setter.cf_domains_table_data[x].record_id == data.record_id){
+                  layui.setter.cf_domains_table_data.splice(x, 1);
+                  break;
+                }
+              }
+
               layer.close(loading1_iii); // 关闭 等待的弹层
               layer.close(index);
               obj.del(); // 删除行

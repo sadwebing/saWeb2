@@ -2,7 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from control.middleware.config  import choices_s
-from domainns.models            import CfAccountTb, DnspodAccountTb
+from domainns.models            import CfAccountTb, DnspodAccountTb, CdnAccountTb
 
 
 class WebUriTb(models.Model):
@@ -75,6 +75,9 @@ class UserGroupPermissionsTb(models.Model):
     cf_account_p     = models.ManyToManyField(CfAccountTb, verbose_name="CloudFlare账号 权限", blank=True)
     dnspod_account_p = models.ManyToManyField(DnspodAccountTb, verbose_name="DnsPod账号 权限", blank=True)
 
+    # domainns cdn 账号权限
+    cdn_account_p    = models.ManyToManyField(CdnAccountTb, verbose_name="cdn账号 权限", blank=True)
+
     status = models.IntegerField(verbose_name="是否启用", choices=choices_s, default=1)
 
     def __str__(self):
@@ -100,6 +103,9 @@ class UserPermissionsTb(models.Model):
     # domainns CF和dnspod 账号权限
     cf_account_p     = models.ManyToManyField(CfAccountTb, verbose_name="CloudFlare账号 权限", blank=True)
     dnspod_account_p = models.ManyToManyField(DnspodAccountTb, verbose_name="DnsPod账号 权限", blank=True)
+
+    # domainns cdn 账号权限
+    cdn_account_p    = models.ManyToManyField(CdnAccountTb, verbose_name="cdn账号 权限", blank=True)
 
     def __str__(self):
         return self.user.username
