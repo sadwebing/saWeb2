@@ -120,12 +120,12 @@ def is_authenticated_to_request(func):
                     if per.uri.strip() not in uri_list: uri_list.append(per.uri.strip())
 
             if path not in uri_list: # 判断是否有权限
-                return_req(socket, request, ret_data)
+                return return_req(socket, request, ret_data)
             else:
                 return func(request, *args, **kwargs)
                 
         except Exception as e:
             logger.error(str(e))
-            return_req(socket, request, ret_data)
+            return return_req(socket, request, ret_data)
 
     return wrapper
