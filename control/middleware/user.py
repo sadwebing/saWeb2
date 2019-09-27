@@ -79,6 +79,13 @@ def login_required_layui(func):
             return func(request, *args, **kwargs)
     return wrapper
 
+def return_req(socket, request, ret_data):
+    if socket:
+        request.send(text_data=json.dumps(ret_data))
+        request.close()
+    else:
+        return HttpResponse(json.dumps(ret_data))
+
 def is_authenticated_to_request(func):
     """
         装饰器：用户请求接口前，判断是否有权限
@@ -96,15 +103,13 @@ def is_authenticated_to_request(func):
         if request.scope and 'user' in request.scope:
             socket = True
             user = request.scope['user']
+            path = request.scope['path']
         else:
             user = request.user
+            path = request.path
 
-        if user.is_superuser:
-            if socket:
-                request.send(text_data=json.dumps(ret_data))
-                request.close()
-            else:
-                return func(request, *args, **kwargs)
+        if user.is_superuser: # 超级用户拥有所有权限
+            return func(request, *args, **kwargs)
         
         try:
             user_web_uri_p = UserPermissionsTb.objects.get(user=user)
@@ -114,25 +119,13 @@ def is_authenticated_to_request(func):
                 for per in group.weburi_p.filter(status=1).all():
                     if per.uri.strip() not in uri_list: uri_list.append(per.uri.strip())
 
-            if request.path in uri_list: # 判断是否有权限
-                if socket:
-                    request.send(text_data=json.dumps(ret_data))
-                    request.close()
-                else:
-                    return func(request, *args, **kwargs)
+            if path not in uri_list: # 判断是否有权限
+                return_req(socket, request, ret_data)
             else:
-                if socket:
-                    request.send(text_data=json.dumps(ret_data))
-                    request.close()
-                else:
-                    return HttpResponse(json.dumps(ret_data))
+                return func(request, *args, **kwargs)
                 
         except Exception as e:
             logger.error(str(e))
-            if socket:
-                request.send(text_data=json.dumps(ret_data))
-                request.close()
-            else:
-                return HttpResponse(json.dumps(ret_data))
+            return_req(socket, request, ret_data)
 
     return wrapper

@@ -106,7 +106,8 @@ def userSession(request):
               "msg": "获取用户信息成功",
               "data": {
                 'username': username,
-                'is_superuser': request.user.is_superuser
+                'is_superuser': request.user.is_superuser,
+                'is_staff': request.user.is_staff
               }
             })
         )
