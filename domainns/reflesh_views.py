@@ -5,11 +5,12 @@ from django.http                    import HttpResponse
 from django.views.decorators.csrf   import csrf_exempt, csrf_protect
 from saWeb2                         import settings
 from control.middleware.user        import User, login_required_layui, is_authenticated_to_request
-from control.middleware.config      import RET_DATA, MESSAGE_TEST, CF_URL, DNSPOD_URL
+from control.middleware.config      import RET_DATA, MESSAGE_TEST, CF_URL, DNSPOD_URL, MESSAGE_ONLINE, MESSAGE_TEST
 from control.middleware.common      import insert_ah
 from domainns.models                import CfAccountTb, DnspodAccountTb, AlterHistoryTb
 from domainns.api.cloudflare        import CfApi
 from domainns.api.dnspod            import DpApi
+from detect.telegram                import SendTelegram
 from pypinyin                       import lazy_pinyin
 from control.middleware.permission.domainns  import Domainns
 
@@ -22,107 +23,43 @@ import datetime
 
 logger = logging.getLogger('django')
 
+#telegram 参数
+message = MESSAGE_ONLINE
+
+def send_telegram_re(message):
+    #message['group'] = 'arno_test'
+    if len(message["text"]) > 10:
+        message["text"] = '\n'.join(message["text"])
+        message["doc"] = True
+        message['doc_name'] = 'domain.txt'
+    else:
+        message["doc"] = False
+        message["text"] = '\r\n'.join(message["text"]) +'\r\n'+ message['caption']
+    SendTelegram(message).send()
+
 @csrf_exempt
 @login_required_layui
 @is_authenticated_to_request
-def get_project(request):
+def reflesh_execute_cdn(request):
     '''
-        获取 清缓存 列表数据
+        刷新指定账号上域名的缓存
     '''
     username, role, clientip = User(request).get_default_values()
 
     # 初始化返回数据
     ret_data = RET_DATA.copy()
     ret_data['code'] = 0 # 请求正常，返回 0
-    ret_data['msg']  = '获取[清缓存列表数据]成功'
+    ret_data['msg']  = '域名缓存刷新成功'
     ret_data['data'] = []
 
     try:
         if request.method == 'POST':
             data = json.loads(request.body)
-            logger.info(data)
-            for zone in data['zones']:
-                dnspod_acc = DnspodAccountTb.objects.get(name=zone['dnspod_acc'])
-                dpapi  = DpApi(DNSPOD_URL, dnspod_acc.key)
-                result, status = dpapi.get_zone_records(zone['domain'])
-                if not status:
-                    logger.error("查询 %s 域名失败！%s" %(zone['domain'], str(result)))
-                    return HttpResponseServerError('error!')
-                else:
-                    #logger.info(result)
-                    for record in result['records']:
-                        if record['type'] in ['A', 'CNAME']:
-                            ret_data['data'].append({
-                                'dnspod_acc':     zone['dnspod_acc'],
-                                'zone':           zone['domain'],
-                                'zone_id':        zone['zone_id'],
-                                'sub_domain':     record['name'],
-                                'name':           record['name']+'.'+zone['domain'] if record['name'] != '@' else zone['domain'],
-                                'type':           record['type'],
-                                'value':          record['value'],
-                                'record_id':      record['id'],
-                                'record_line':    record['line'],
-                                'record_line_id': record['line_id'],
-                                #'record_line_id': record['line_id'].replace('=', '%3D'),
-                                'enabled':        record['enabled'],
-                            })
-
+            ret_data['data'] = data
     except Exception as e:
         logger.error(str(e))
         ret_data['code'] = 500
-        ret_data['msg']  = '获取域名信息失败: %s' %str(e)
-
-    ret_data['count'] = len(ret_data['data'])
-
-    return HttpResponse(json.dumps(ret_data))
-
-@csrf_exempt
-@login_required_layui
-@is_authenticated_to_request
-def update_records(request):
-    '''
-        更新DNSPOD 域名解析
-    '''
-    username, role, clientip = User(request).get_default_values()
-
-    # 初始化返回数据
-    ret_data = RET_DATA.copy()
-    ret_data['code'] = 0 # 请求正常，返回 0
-    ret_data['msg']  = '修改域名解析成功'
-    ret_data['data'] = []
-
-    try:
-        if request.method == 'POST':
-            data = json.loads(request.body)
-            for record in data['records']:
-                dnspod_acc = DnspodAccountTb.objects.get(name=record['dnspod_acc'])
-                dpapi  = DpApi(DNSPOD_URL, dnspod_acc.key)
-
-                result, status = dpapi.update_zone_record(
-                    domain         = record['zone'],
-                    record_id      = record['record_id'],
-                    sub_domain     = record['sub_domain'],
-                    record_type    = data['type'],
-                    value          = data['value'],
-                    record_line_id = record['record_line_id'],
-                    status         = 'enable' if data['enabled'] == '1' else 'disable'
-                    )
-                if not status:
-                    logger.error(str(result))
-                    ret_data['code'] = 500
-                    ret_data['msg']  = "修改 %s 域名解析失败！%s" %(zone['name'], str(result))
-                    logger.error(ret_data['msg'])
-                    return HttpResponse(json.dumps(ret_data))
-                logger.info("req_ip: %s | user: %s | updaterecord: { 'type':%s, 'name': %s, 'content': %s, 'proxied':%s } ---> { 'type':%s, 'name': %s, 'content': %s, 'proxied':%s }" %(clientip, username, record['type'], record['name'], record['value'], record['enabled'], data['type'], record['name'], data['value'], data['enabled']))
-
-                insert_ah(clientip, username, 
-                        "'type':%s, 'name': %s, 'content': %s, 'enabled':%s" %(record['type'], record['name'], record['value'], record['enabled']), 
-                        "'type':%s, 'name': %s, 'content': %s, 'enabled':%s" %(data['type'], record['name'], data['value'], data['enabled']), 
-                        status)
-    except Exception as e:
-        logger.error(str(e))
-        ret_data['code'] = 500
-        ret_data['msg']  = '修改域名信息失败: %s' %str(e)
+        ret_data['msg']  = '域名缓存刷新失败: %s' %str(e)
 
     return HttpResponse(json.dumps(ret_data))
 

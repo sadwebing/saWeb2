@@ -54,7 +54,7 @@ class AwsApi(object):
     def sendTelegramAlert(self, content=""):
         message['text'] = content
         logger.error(message['text'])
-        sendTelegram(message).send()
+        SendTelegram(message).send()
 
     def getdomains(self, product=[]):
         '''
@@ -90,7 +90,7 @@ class AwsApi(object):
         except Exception as e:
             message['text'] = self.__warning + '\r\n' + str(e).replace('<', '&lt;').replace('>', '&gt;')[:2047]
             logger.error(message['text'])
-            sendTelegram(message).send()
+            SendTelegram(message).send()
             return [], False
 
         else:

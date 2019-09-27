@@ -52,7 +52,7 @@ class SendTelegram(object):
         self.__timeout = timeout
         self.__url     = tg['url'][bot] if bot in tg['url'] else tg['url']['sa_monitor_bot']
         self.__message['parse_mode'] = message['parse_mode'] if 'parse_mode' in message else ''
-        self.__message['doc_name']   = getDate() +'_'+ message['doc_name'] if 'doc_name' in message else getDate()+'_message.txt'
+        self.__message['doc_name']   = f"{settings.BASE_DIR}/tmp/{getDate()}_{message['doc_name']}" if 'doc_name' in message else getDate()+'_message.txt'
         self.__message['caption']    = self.get_at_users(message['caption']) if 'caption'  in message  else ''
         self.__message['text']       = self.get_at_users(message['text'])    if 'text'     in message else ''
         self.__message['disable_web_page_preview'] = False if 'disable_web_page_preview' in message and str(message['disable_web_page_preview']).lower() == 'false' else True

@@ -53,6 +53,21 @@ var public = {
         } 
     },
 
+    isUri: function (value) {
+        var regexp = /^(\/[0-9a-zA-Z_!~*\'().;?:@&=+$,%#-]+)+\/?$/;
+        //var regexp = /^\/[a-zA-Z0-9]+.*[a-zA-Z0-9\/]+$/;
+        //var regexp_tw = /^(tw|.*\.tw)\..*$/;
+
+        if (value === '/'){
+            return true;
+        }
+        var valid = regexp.test(value);
+        if(!valid){
+            return false;
+        }
+        return true;
+    },
+
     showSelectedValue: function (selectid, bool){
         var selectedValue = []; 
         var objSelect = document.getElementById(selectid); 
@@ -138,6 +153,36 @@ var public = {
         }
     },
 
+    emptyForm: function(form_id){
+        var elms = $("#"+form_id+" [name]"); //formid 包含name属性的所有元素
+        var obj = {};
+        $.each(elms, function (i, item) {
+            var name = $(item).attr("name");
+            obj[name] = "";
+        });
+        return obj;
+    },
+
+    socketonMessage: function(e){
+        var data = JSON.parse(e.data);
+        if (data.code == 1001){
+            layui.admin.exit()
+            window.s.close();
+            return false;
+        }else if(data.code == 500){
+            layer.msg(data.msg, {
+                offset: '15px'
+                ,shift: 6
+                ,icon: 5
+                ,time: 1000
+            });
+            window.s.close();
+            return false;
+        }
+
+        return data;
+    },
+
     socketConn: function (uri, buttons) {
         if (! uri){
             return false;
@@ -147,27 +192,17 @@ var public = {
         }
         var socket = new WebSocket("ws://" + window.location.host + uri);
         window.s = socket;
-        socket.onopen = function (e) {
+        window.s.onopen = function (e) {
             //console.log('WebSocket open');//成功连接上Websocket
         };
-        socket.onmessage = function (e) {
-            //console.log('WebSocket open');//成功连接上Websocket
-
-            if (e.data == 'userNone'){
-                toastr.error('未获取用户名，请重新登陆！', '错误');
-                public.disableButtons(window.buttons, false);
-                window.s.close();
-                return false;
-            }
+        window.s.onmessage = function (e) {
+            
         };
         //$('#runprogress').modal('show');
-        socket.onerror = function (){
-            toastr.error('后端服务响应出现错误', '错误');
+        window.s.onerror = function (){
             public.disableButtons(buttons, false);
         };
-        socket.onclose = function () {
-            //setTimeout(function(){$('#confirmEditModal').modal('hide');}, 1000);
-            toastr.info('连接已关闭...');
+        window.s.onclose = function () {
             public.disableButtons(buttons, false);
         };
         

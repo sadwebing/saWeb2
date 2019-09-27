@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'control',
     'domainns',
     'detect',
+    'channels', # websocket 模块
 ]
 
 MIDDLEWARE = [
@@ -71,8 +72,18 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'saWeb2.wsgi.application'
+# WSGI_APPLICATION = 'saWeb2.wsgi.application'
+ASGI_APPLICATION = "saWeb2.asgi.application"
 
+# CHANNEL_LAYERS = {
+#     'default': { 
+#         'BACKEND': 'asgi_redis.RedisChannelLayer',
+#         'CONFIG': {
+#             'hosts': [('182.16.117.187', 6379)],
+#         },
+#         # 'ROUTING': 'rest.routing.application',
+#     }
+# }
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

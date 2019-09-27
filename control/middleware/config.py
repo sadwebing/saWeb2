@@ -125,7 +125,7 @@ MESSAGE_TEST = {
     'doc': False,
     'bot': "sa_monitor_bot", #AuraAlertBot: 大魔王
     'text': "",
-    'group': "arno_test",
+    'group': "arno_test2",
     'parse_mode': "HTML",
     'doc_file': "message.txt",
 }

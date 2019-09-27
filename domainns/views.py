@@ -21,6 +21,7 @@ import json
 import time
 import logging
 import requests
+from urllib.parse import urlparse
 
 logger = logging.getLogger('django')
 
@@ -141,12 +142,21 @@ def get_reflesh_project(request):
     ret_data['msg']  = '获取[清缓存列表数据]成功'
     ret_data['data'] = {'domain_project': [], 'cdn': []}
 
+    # 获取 cdn缓存项目
+    domain_project_list = DoaminProjectTb.objects.filter(status=1).all()
+    for prot in domain_project_list:
+        tmpdict = {}
+        tmpdict['project'] = prot.project
+        tmpdict['domain']  = [ {'id': domain.id,
+                                'name': urlparse(domain.name).scheme+"://"+urlparse(domain.name).netloc,
+                                'product': domain.get_product_display(),
+                                'customer': domain.get_customer_display()} for domain in prot.domain.all() ]
+        #tmpdict['cdn']     = [ {'name': cdn.get_name_display(),
+        #                        'account': cdn.account} for cdn in cdn_t.objects.all() ]
+        ret_data['data']['domain_project'].append(tmpdict)
+
     # 获取cdn 账号
     cdn_acc_list = Domainns(request).get_cdn_account()
-
-    # 获取项目 列表
-    domain_project_list = DoaminProjectTb.objects.filter(status=1).all()
-
     for cdn in cdn_acc_list:
         tmpdict = {
             'id':      cdn.id,
@@ -188,7 +198,7 @@ def get_reflesh_project(request):
         else:
             tmpdict['domain'] = []
         ret_data['data']['cdn'].append(tmpdict)
-        # break
+        break
 
     #logger.info(ret_data['data'])
     ret_data['data']['cdn'].sort(key=lambda acc: acc['name']) # CDN账号按 name的分类 排序

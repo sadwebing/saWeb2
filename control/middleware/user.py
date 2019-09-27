@@ -65,7 +65,7 @@ def login_required_layui(func):
     @wraps(func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated: 
-            return HttpResponse(json.dumps(ret_data))
+            return HttpResponse(json.dumps(RET_DATA))
         else:
             return func(request, *args, **kwargs)
     return wrapper

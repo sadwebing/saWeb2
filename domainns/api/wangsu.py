@@ -60,16 +60,16 @@ class WsApi(object):
             ret = requests.get(url, headers=headers, auth=(self.__username, signed_apikey))
     
         except Exception as e:
-            message['text'] = self.__warning + '\nException: ' + e.message
+            message['text'] = self.__warning + '\nException: ' + str(e)
             logger.error(message['text'])
-            sendTelegram(message).send()
+            SendTelegram(message).send()
             return {}, False
     
         else:
             if ret.status_code != 200:
                 message['text'] = self.__warning + '\n' + str(ret.content.replace('<', '&lt;').replace('>', '&gt;'))
                 logger.error(message['text'])
-                sendTelegram(message).send()
+                SendTelegram(message).send()
                 return ret.content, False
     
             else:
@@ -104,24 +104,24 @@ class WsApi(object):
     
         try:
             ret = requests.post(url, headers=headers, auth=(self.__username, signed_apikey), data=json.dumps(data))
-            logger.info(str(ret.status_code)+': '+ret.content)
+            # logger.info(str(ret.status_code)+': '+ret.content)
     
         except Exception as e:
-            message['text'] = self.__warning + '\nException: ' + e.message
+            message['text'] = self.__warning + '\nException: ' + str(e)
             logger.error(message['text'])
-            sendTelegram(message).send()
+            SendTelegram(message).send()
             return {}, False
     
         else:
             if ret.status_code != 200:
-                message['text'] = self.__warning + '\n' + str(ret.content.replace('<', '&lt;').replace('>', '&gt;'))
+                message['text'] = self.__warning + '\n' + str(ret.content).replace('<', '&lt;').replace('>', '&gt;')
                 logger.error(message['text'])
-                sendTelegram(message).send()
+                SendTelegram(message).send()
                 return ret.content, False
             elif ret.status_code == 200 and ret.json()['Code'] != 1:
-                message['text'] = self.__warning + '\n' + str(ret.content.replace('<', '&lt;').replace('>', '&gt;'))
+                message['text'] = self.__warning + '\n' + str(ret.content).replace('<', '&lt;').replace('>', '&gt;')
                 logger.error(message['text'])
-                sendTelegram(message).send()
+                SendTelegram(message).send()
                 return ret.content, False
             else:
                 return ret.json(), True

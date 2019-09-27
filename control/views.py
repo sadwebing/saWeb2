@@ -25,7 +25,7 @@ logger = logging.getLogger('django')
 
 # Create your views here.
 @csrf_exempt
-@login_required_layui
+# @login_required_layui
 def index(request):
     '''
         主页入口
