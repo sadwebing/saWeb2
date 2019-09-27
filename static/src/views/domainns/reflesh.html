@@ -355,8 +355,13 @@ layui.use(['admin', 'form', 'formSelects', 'upload'], function(){
 
     }; 
 
-    window.s.onerror = function (){
-      layer.msg("连接错误", {
+    window.s.onerror = function (e){
+      if (e){
+        code=e.code;
+        console.log(code);
+      }
+
+      layer.msg("网络错误", {
           offset: '15px'
           ,shift: 6
           ,icon: 5
@@ -365,7 +370,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload'], function(){
       layer.close(loading1_iii);
     };
 
-    window.s.onclose = function () {
+    window.s.onclose = function (e) {
       layer.close(loading1_iii);
     };
 
@@ -465,7 +470,7 @@ layui.use(['admin', 'form', 'formSelects', 'upload'], function(){
     }; 
 
     window.s.onerror = function (){
-      layer.msg("连接错误", {
+      layer.msg("网络错误，或者登陆失效！", {
           offset: '15px'
           ,shift: 6
           ,icon: 5

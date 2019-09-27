@@ -166,10 +166,16 @@ var public = {
     socketonMessage: function(e){
         var data = JSON.parse(e.data);
         if (data.code == 1001){
+            layer.msg(data.msg, {
+                offset: '15px'
+                ,shift: 6
+                ,icon: 5
+                ,time: 1000
+            });
             layui.admin.exit()
             window.s.close();
             return false;
-        }else if(data.code == 500){
+        }else if(data.code != 0){
             layer.msg(data.msg, {
                 offset: '15px'
                 ,shift: 6

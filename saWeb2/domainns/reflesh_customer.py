@@ -8,7 +8,7 @@ from domainns.models       import CdnAccountTb, CfAccountTb, DomainTb
 
 from domainns.reflesh_views    import send_telegram_re
 from domainns.api.cloudflare   import CfApi
-from control.middleware.user   import User
+from control.middleware.user   import User, login_required_layui, is_authenticated_to_request
 from control.middleware.config import MESSAGE_TEST, MESSAGE_ONLINE, CF_URL, DNSPOD_URL, RET_DATA
 
 
@@ -131,16 +131,13 @@ class DomainnsRefleshExecuteCdn(DefConsumer):
     # Set to True to automatically port users from HTTP cookies
     # (you don't need channel_session_user, this implies it)
 
+    @login_required_layui
+    @is_authenticated_to_request
     def receive(self, text_data):
         """
         Called when a message is received with either text or bytes
         filled out.
         """
-
-        if not self.scope['user'].is_authenticated: # 登陆失效，无法继续操作
-            self.close()
-            return False
-
         try:
             data = json.loads(text_data)
             # logger.info(data)
@@ -205,15 +202,13 @@ class DomainnsRefleshExecuteProject(DefConsumer):
     # Set to True to automatically port users from HTTP cookies
     # (you don't need channel_session_user, this implies it)
 
+    @login_required_layui
+    @is_authenticated_to_request
     def receive(self, text_data):
         """
         Called when a message is received with either text or bytes
         filled out.
         """
-        if not self.scope['user'].is_authenticated: # 登陆失效，无法继续操作
-            self.close()
-            return False
-
         try:
             data = json.loads(text_data)
 

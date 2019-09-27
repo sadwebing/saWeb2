@@ -25,15 +25,15 @@ class DefConsumer(WebsocketConsumer):
             'msg': ""
         }
 
+        # 判断账号是否登陆
+        # if not self.scope['user'].is_authenticated: 
+        #     self._ret_data['code'] = 1001
+        #     # self.send(text_data=json.dumps(self._ret_data))
+        #     self.close(code=self._ret_data['code'])
+        #     return False
+
         # 接受全部
         self.accept()
-
-        # 判断账号是否登陆
-        if not self.scope['user'].is_authenticated: 
-            self._ret_data['code'] = 1001
-            self.send(text_data=json.dumps(self._ret_data))
-            self.close()
-            return False
 
         # 获取账号基本信息
         self.username = self.scope['user'].username

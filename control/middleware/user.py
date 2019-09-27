@@ -64,6 +64,15 @@ def login_required_layui(func):
     """
     @wraps(func)
     def wrapper(request, *args, **kwargs):
+        # 判断 websocket 请求
+        if request.scope and 'user' in request.scope:
+            if not request.scope['user'].is_authenticated: 
+                request.send(text_data=json.dumps(RET_DATA))
+                request.close()
+            else:
+                return func(request, *args, **kwargs)
+
+        # 判断 http 请求
         if not request.user.is_authenticated: 
             return HttpResponse(json.dumps(RET_DATA))
         else:
@@ -82,11 +91,23 @@ def is_authenticated_to_request(func):
 
     @wraps(func)
     def wrapper(request, *args, **kwargs):
-        if request.user.is_superuser:
-            return func(request, *args, **kwargs)
+        socket = False
+        # 判断 是否是 websocket 请求
+        if request.scope and 'user' in request.scope:
+            socket = True
+            user = request.scope['user']
+        else:
+            user = request.user
+
+        if user.is_superuser:
+            if socket:
+                request.send(text_data=json.dumps(ret_data))
+                request.close()
+            else:
+                return func(request, *args, **kwargs)
         
         try:
-            user_web_uri_p = UserPermissionsTb.objects.get(user=request.user)
+            user_web_uri_p = UserPermissionsTb.objects.get(user=user)
             uri_list = [ per.uri.strip() for per in user_web_uri_p.weburi_p.filter(status=1).all() ] # 获取单独用户的权限
 
             for group in user_web_uri_p.usergroup_p.filter(status=1).all(): # 循环将组权限 分配给用户
@@ -94,11 +115,24 @@ def is_authenticated_to_request(func):
                     if per.uri.strip() not in uri_list: uri_list.append(per.uri.strip())
 
             if request.path in uri_list: # 判断是否有权限
-                return func(request, *args, **kwargs)
+                if socket:
+                    request.send(text_data=json.dumps(ret_data))
+                    request.close()
+                else:
+                    return func(request, *args, **kwargs)
             else:
-                return HttpResponse(json.dumps(ret_data))
+                if socket:
+                    request.send(text_data=json.dumps(ret_data))
+                    request.close()
+                else:
+                    return HttpResponse(json.dumps(ret_data))
+                
         except Exception as e:
             logger.error(str(e))
-            return HttpResponse(json.dumps(ret_data))
+            if socket:
+                request.send(text_data=json.dumps(ret_data))
+                request.close()
+            else:
+                return HttpResponse(json.dumps(ret_data))
 
     return wrapper
