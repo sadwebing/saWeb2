@@ -198,7 +198,7 @@ def get_reflesh_project(request):
         else:
             tmpdict['domain'] = []
         ret_data['data']['cdn'].append(tmpdict)
-        break
+        # break
 
     #logger.info(ret_data['data'])
     ret_data['data']['cdn'].sort(key=lambda acc: acc['name']) # CDN账号按 name的分类 排序
