@@ -9,7 +9,7 @@ import datetime, pytz
 class TelegramChatGroupTb(models.Model):
     name     = models.CharField(max_length=32, null=False)
     group    = models.CharField(max_length=32, null=False)
-    group_id = models.IntegerField()
+    group_id = models.CharField(max_length=32, null=False)
     status   = models.IntegerField(choices=choices_s, default=1)
     class Meta:
         unique_together = ('group' ,'group_id')

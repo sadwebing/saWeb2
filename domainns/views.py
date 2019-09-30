@@ -5,8 +5,8 @@ from django.http                    import HttpResponse
 from django.views.decorators.csrf   import csrf_exempt, csrf_protect
 from saWeb2                         import settings
 from control.middleware.user        import User, login_required_layui, is_authenticated_to_request
-from control.middleware.config      import RET_DATA, MESSAGE_TEST, CF_URL, DNSPOD_URL
-from domainns.models                import CfAccountTb, DnspodAccountTb, DoaminProjectTb
+from control.middleware.config      import RET_DATA, MESSAGE_TEST, CF_URL, DNSPOD_URL, choices_customer, choices_product
+from domainns.models                import CfAccountTb, DnspodAccountTb, DoaminProjectTb, CdnAccountTb, DomainDetectGroupTb
 from domainns.api.cloudflare        import CfApi
 from domainns.api.dnspod            import DpApi
 from domainns.api.tencent           import TcApi
@@ -204,3 +204,66 @@ def get_reflesh_project(request):
     ret_data['data']['cdn'].sort(key=lambda acc: acc['name']) # CDN账号按 name的分类 排序
 
     return HttpResponse(json.dumps(ret_data))
+
+
+@csrf_exempt
+@login_required_layui
+@is_authenticated_to_request
+def get_domain_args(request):
+    '''
+        获取域名 列表
+    '''
+    username, role, clientip = User(request).get_default_values()
+
+    # 初始化返回数据
+    ret_data = RET_DATA.copy()
+    ret_data['code'] = 0 # 请求正常，返回 0
+    ret_data['msg']  = '获取DNSPOD账号列表'
+    ret_data['data'] = {}
+    
+    # 获取 cdn 账号列表
+    cdn_acc_list = Domainns(request).get_cdn_account()
+
+    # 获取 cf 账号列表
+    cf_acc_list = Domainns(request).get_cf_account()
+
+    group_list   = DomainDetectGroupTb.objects.all()
+    ret_data['data'] = {
+            'customer': choices_customer,
+            'product' : choices_product,
+            'group'   : [],
+            'cdn'     : [],
+            'cf'      : [],
+        }
+
+    for cdn in cdn_acc_list:
+        tmp_dict = {
+            'id':      cdn.id,
+            'name':    cdn.get_name_display(),
+            'account': cdn.account,
+        }
+
+        ret_data['data']['cdn'].append(tmp_dict)
+
+    for cf in cf_acc_list:
+        tmp_dict = {
+            'id':      cf.id,
+            'name':    "cloudflare",
+            'account': cf.name,
+        }
+        ret_data['data']['cf'].append(tmp_dict)
+
+    for item in group_list:
+        tmp_dict = {}
+        tmp_dict['id']     = item.id
+        tmp_dict['group']  = item.group
+        tmp_dict['client'] = item.client
+        tmp_dict['method'] = item.method
+        tmp_dict['ssl']    = item.ssl
+        tmp_dict['retry']  = item.retry
+
+        ret_data['data']['group'].append(tmp_dict)
+
+    return HttpResponse(json.dumps(ret_data))
+
+    

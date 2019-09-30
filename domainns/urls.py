@@ -4,6 +4,7 @@ from django.views.generic.base import RedirectView
 from . import views
 from domainns import dnspod_views
 from domainns import reflesh_views
+from domainns import domain_views
 
 urlpatterns = [
     # CloudFlare
@@ -20,7 +21,7 @@ urlpatterns = [
     url('dnspod/delete_records$', dnspod_views.delete_records, name='DeleteRecords'),
     url('dnspod/add_records$', dnspod_views.add_records, name='AddRecords'),
 
-    #缓存清理
+    # 缓存清理
     url('^reflesh$', views.get_reflesh_project),
     # url('^reflesh/get_domains$', views.refleshGetDomains),
     # url('^reflesh/get_cdnmiddlesourcelist$', views.GetCdnMiddleSourceList),
@@ -29,6 +30,11 @@ urlpatterns = [
     # url('^reflesh/purge$', views.refleshPurge),
     # url('^reflesh/purgecfdomain$', views.purgeCfDomain),
 
+    # 域名列表
+    url('^domain/args$', views.get_domain_args),
+    url('^domain/get_records$', domain_views.get_domain_records),
+    url('^domain/add_records$', domain_views.add_domain_records),
+    url('^domain/edit_records$', domain_views.edit_domain_records),
 
     # url('get_domains$', views.GetDomains, name='GetDomains'),
     # url('send_telegram$', views.SendTelegram, name='SendTelegram'),

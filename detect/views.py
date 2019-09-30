@@ -46,9 +46,9 @@ def telegram_group(request):
     if request.user.is_superuser or username == 'test':
         groupSelects = TelegramChatGroupTb.objects.filter(status=1).all()
     elif role == "sa":
-        groupSelects = TelegramChatGroupTb.objects.filter(status=1, group__in=['kindergarten', 'zhuanyepan', 'yunwei']).all()
+        groupSelects = TelegramChatGroupTb.objects.filter(status=1, group__in=['kindergarten', 'zhuanyepan', 'yunwei', 'sport2']).all()
     else:
-        groupSelects = TelegramChatGroupTb.objects.filter(status=1, group__in=['kindergarten', 'zhuanyepan']).all()
+        groupSelects = TelegramChatGroupTb.objects.filter(status=1, group__in=['kindergarten', 'zhuanyepan', 'sport2']).all()
 
     for department in atUsersSelects:
         atUsers[department.name] = {

@@ -1149,6 +1149,22 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 		});
 	};
 
+	Common.prototype.getAllValues = function (id) {
+		var _this13 = this;
+
+		var target = {};
+		if (id) {
+			target[id] = data[id];
+		} else {
+			target = data;
+		}
+		$.each(target, function (key, val) {
+			var values = val.values;
+			var _vals = values.concat([]);
+			console.log(_vals);
+		});
+	};
+
 	Common.prototype.setHidnVal = function (key, label) {
 		if (!label || !label[0]) {
 			return;
@@ -1510,6 +1526,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 			return [];
 		}
 		var fs = data[id];
+		// console.log(fs);
 		if (!common.check(id)) {
 			return [];
 		}

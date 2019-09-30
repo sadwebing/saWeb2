@@ -68,6 +68,37 @@ var public = {
         return true;
     },
 
+    showFormSelectedValue: function (selectid, bool, isToInt){
+        var selectedValue = []; 
+        var objSelect = document.getElementById(selectid); 
+        for(var i = 0; i < objSelect.options.length; i++) {
+            //console.log(selectedValue); 
+            if (objSelect.options[i].selected == true) {
+                if (objSelect.options[i].value == ""){
+                    continue;
+                }
+                if (isToInt){
+                    selectedValue.push(parseInt(objSelect.options[i].value));
+                }else {
+                    selectedValue.push(objSelect.options[i].value);
+                }
+            }
+        }
+        if (bool){
+            if (selectedValue.length == 0) {
+                for(var i = 0; i < objSelect.options.length; i++) {
+                    if (isToInt){
+                        selectedValue.push(parseInt(objSelect.options[i].value));
+                    }else {
+                        selectedValue.push(objSelect.options[i].value);
+                    }
+                }
+            }
+        }
+        
+        return selectedValue;
+    },
+
     showSelectedValue: function (selectid, bool){
         var selectedValue = []; 
         var objSelect = document.getElementById(selectid); 
