@@ -35,6 +35,7 @@ urlpatterns = [
     url('^domain/get_records$', domain_views.get_domain_records),
     url('^domain/add_records$', domain_views.add_domain_records),
     url('^domain/edit_records$', domain_views.edit_domain_records),
+    url('^domain/delete_records$', domain_views.delete_domain_records),
 
     # url('get_domains$', views.GetDomains, name='GetDomains'),
     # url('send_telegram$', views.SendTelegram, name='SendTelegram'),

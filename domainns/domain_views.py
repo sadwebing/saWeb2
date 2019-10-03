@@ -208,41 +208,32 @@ def edit_domain_records(request):
 @csrf_exempt
 @login_required_layui
 @is_authenticated_to_request
-def delete_records(request):
+def delete_domain_records(request):
     '''
-        删除DNSPOD 域名解析
+        删除域名记录
     '''
     username, role, clientip = User(request).get_default_values()
 
     # 初始化返回数据
     ret_data = RET_DATA.copy()
     ret_data['code'] = 0 # 请求正常，返回 0
-    ret_data['msg']  = '删除域名解析成功'
+    ret_data['msg']  = '删除域名记录成功'
     ret_data['data'] = []
 
     try:
         if request.method == 'POST':
             data = json.loads(request.body)
-            for zone in data:
-                dnspod_acc = DnspodAccountTb.objects.get(name=zone['dnspod_acc'])
-                dpapi  = DpApi(DNSPOD_URL, dnspod_acc.key)
 
-                result, status = dpapi.delete_zone_record(zone['zone'], zone['record_id'], zone['name'])
-                if not status:
-                    logger.error(str(result))
-                    ret_data['code'] = 500
-                    ret_data['msg']  = "删除 %s 域名失败！%s" %(zone['name'], str(result))
-                    logger.error(ret_data['msg'])
-                    return HttpResponse(json.dumps(ret_data))
-                else:
-                    logger.info("删除 %s 域名成功！%s" %(zone['name'], str(result)))
-                    insert_ah(clientip, username, 
-                        "'type':%s, 'name': %s, 'content': %s, 'enabled':%s" %(zone['type'], zone['name'], zone['value'], zone['enabled']), 
-                        "null", 
-                        status, 'delete')
+            logger.info(data)
+            # return HttpResponse(json.dumps(ret_data))
+            for record in data['records']:
+                domain = DomainTb.objects.get(id=record['id']) # 获取域名
+
+                domain.delete()
+
     except Exception as e:
         logger.error(str(e))
         ret_data['code'] = 500
-        ret_data['msg']  = '删除域名解析失败: %s' %str(e)
+        ret_data['msg']  = '删除域名记录失败: %s' %str(e)
 
     return HttpResponse(json.dumps(ret_data))

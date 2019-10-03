@@ -218,12 +218,12 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
         layui.setter.domain_edit_datas = checkStatus.data;
         if (layui.setter.domain_edit_datas.length == 0){
           layer.msg('请至少选择一行数据', {
-            offset: '15px'
-            ,shift: 6
-            ,icon: 5
-            ,time: 1500
-        });
-        return false;
+              offset: '15px'
+              ,shift: 6
+              ,icon: 5
+              ,time: 1500
+          });
+          return false;
         }
 
         admin.popup({
@@ -343,6 +343,86 @@ layui.use(['admin', 'form', 'formSelects', 'upload', 'table'], ()=>{
             });
           }
         });
+      break;
+      case 'domain_delete': 
+      layui.setter.domain_delete_datas = checkStatus.data;
+      if (layui.setter.domain_delete_datas.length == 0){
+          layer.msg('请至少选择一行数据', {
+            offset: '15px'
+            ,shift: 6
+            ,icon: 5
+            ,time: 1500
+        });
+        return false;
+      }
+
+      admin.popup({
+        title: '删除域名'
+        ,offset: "t" 
+        ,area: ['1000px', '700px']
+        ,id: 'LAY-popup-user-delete'
+        ,success: function(layero, index){
+          view(this.id).render('domainns/list/delete').done(function(){
+            form.render(null, 'domain-delete-form');
+            
+            //监听提交
+            form.on('submit(domain-delete-form-submit)', function(data){
+              var postData = {
+                'records': layui.setter.domain_delete_datas,
+              }
+
+              loading1.call(this); // 打开 等待的弹层
+
+              admin.req({
+                url: '/domainns/domain/delete_records' //实际使用请改成服务端真实接口code == 1001
+                ,method: "post" 
+                ,data: JSON.stringify(postData)
+                ,contentType: 'application/json'
+                ,done: function(res){
+                  // 发送成功的提示
+                  layer.msg(res.msg, {
+                    offset: '15px'
+                    ,icon: 1
+                    ,time: 1500
+                  });
+
+                  // 将删除的域名剔除数据列表
+                  for (var x in layui.setter.domain_delete_datas){
+                    for (var y in layui.setter.domains_table_data){
+                      if (layui.setter.domain_delete_datas[x].id == layui.setter.domains_table_data[y].id){
+                        layui.setter.domains_table_data.splice(y, 1)
+                      }
+                    }
+                  }
+                  table.reload('domains_table', {
+                    data: layui.setter.domains_table_data
+                  })
+
+                  layer.close(loading1_iii); // 关闭 等待的弹层
+                  layer.close(index); //执行关闭 
+                },success:function(res){
+                  if (res.code == 1001){ // 登陆失效
+                    layer.msg(res.msg, {
+                      offset: '15px'
+                      ,icon: 1
+                      ,time: 1500
+                    })
+                  };
+                  layer.close(loading1_iii);
+                }
+                
+              });
+
+              return false;
+
+
+              // layer.close(index); //执行关闭 
+            });
+          });
+        }
+      });
+
+
       break;
 
     };
